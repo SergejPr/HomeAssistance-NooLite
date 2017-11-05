@@ -1,0 +1,31 @@
+Living Room:
+  entities:
+    - light.room_light
+    - light.room_work_lights
+    - light.room_light_rgb
+
+Kitchen:
+  entities:
+    - light.kitchen_light
+
+Hall:
+  entities:
+    - light.hall_light
+
+Bathroom:
+  entities:
+    - light.bathroom_light
+
+WC:
+  entities:
+    - light.wc_light
+
+Rooms:
+  view: yes
+  name: Rooms
+  entities:
+    - group.living_room
+    - group.kitchen
+    - group.hall
+    - group.bathroom
+    - group.wc

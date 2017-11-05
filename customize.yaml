@@ -1,0 +1,20 @@
+light.room_light:
+    friendly_name: "Light"
+
+light.room_work_lights:
+    friendly_name: "Work area light"
+
+light.room_light_rgb:
+    friendly_name: "RGB Light"
+
+light.kitchen_light:
+    friendly_name: "Light"
+
+light.wc_light:
+    friendly_name: "Light"
+
+light.bathroom_light:
+    friendly_name: "Light"
+
+light.hall_light:
+    friendly_name: "Light"
