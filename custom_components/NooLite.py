@@ -3,19 +3,16 @@ Support for NooLite.
 """
 
 import logging
-
 import voluptuous as vol
 
-from homeassistant.const import EVENT_HOMEASSISTANT_STOP, CONF_NAME, CONF_PORT, CONF_TYPE
+from homeassistant.const import CONF_NAME, CONF_PORT, CONF_MODE
 from homeassistant.const import STATE_UNKNOWN
+from homeassistant.const import EVENT_HOMEASSISTANT_STOP
 
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers import config_validation as cv
 
-from NooLite_F import ModuleInfo, ModuleState, ModuleType
-
-
-REQUIREMENTS = ['NooLite-F==0.0.7']
+REQUIREMENTS = ['NooLite-F==0.0.15']
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -39,8 +36,7 @@ CONFIG_SCHEMA = vol.Schema({
 PLATFORM_SCHEMA = vol.Schema({
     vol.Required(CONF_NAME): cv.string,
     vol.Required(CONF_CHANNEL): cv.positive_int,
-    vol.Required(CONF_TYPE): cv.string,
-    vol.Optional(CONF_BROADCAST, default=False): cv.boolean,
+    vol.Required(CONF_MODE): cv.string,
 }, extra=vol.ALLOW_EXTRA)
 
 
@@ -57,7 +53,26 @@ def setup(hass, config):
         _LOGGER.exception("Unable to open serial port for NooLite: %s", exc)
         return False
 
+    hass.bus.listen_once(EVENT_HOMEASSISTANT_STOP, _release_noolite)
+
     return True
+
+
+def _release_noolite(*args):
+    DEVICE.release()
+
+
+def _module_mode(config):
+    from NooLite_F import ModuleMode
+
+    mode = config.get(CONF_MODE)
+
+    if mode == 'NooLite':
+        module_mode = ModuleMode.NOOLITE
+    else:
+        module_mode = ModuleMode.NOOLITE_F
+
+    return module_mode
 
 
 class NooLiteModule(Entity):
@@ -80,39 +95,87 @@ class NooLiteModule(Entity):
 
     @property
     def assumed_state(self) -> bool:
-        """Return True if unable to access real state of the entity."""
-        return self._module_type() == ModuleType.NOOLITE
+        from NooLite_F import ModuleMode
+        return _module_mode(self._config) == ModuleMode.NOOLITE
 
     def turn_on(self, **kwargs):
-        responses = DEVICE.on(self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), self._module_type())
+        responses = DEVICE.on(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
         self._update_state_from(responses)
 
     def turn_off(self, **kwargs):
-        responses = DEVICE.off(self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), self._module_type())
+        responses = DEVICE.off(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
         self._update_state_from(responses)
 
     def toggle(self, **kwargs) -> None:
-        responses = DEVICE.switch(self._config.channel, self._config.broadcast)
+        responses = DEVICE.switch(None, self._config.channel, self._config.broadcast)
         self._update_state_from(responses)
 
     def update(self):
-        responses = DEVICE.read_state(self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), self._module_type())
+        responses = DEVICE.read_state(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
         self._update_state_from(responses)
 
     def _update_state_from(self, responses):
+        from NooLite_F import ModuleState
+
         state = False
         for (result, info) in responses:
-            if result and info is not None and (info.state == ModuleState.ON or info.state == ModuleState.TEMPORARY_ON):
-                state = True
+            if result and info is not None:
+                if info.state == ModuleState.ON or info.state == ModuleState.TEMPORARY_ON:
+                    state = True
 
         self._state = state
 
-    def _module_type(self) -> ModuleType:
-        type = self._config.get(CONF_TYPE)
 
-        if type == 'NooLite':
-            device_type = ModuleType.NOOLITE
-        else:
-            device_type = ModuleType.NOOLITE_F
+class NooLiteDimmerModule(NooLiteModule):
 
-        return device_type
+    def __init__(self, hass, config):
+        super().__init__(hass, config)
+        self._brightness = None
+
+    @property
+    def brightness(self):
+        return self._brightness
+
+    @brightness.setter
+    def brightness(self, brightness):
+        DEVICE.set_brightness(brightness, None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
+
+    def _update_state_from(self, responses):
+        super()._update_state_from(responses)
+
+        for (result, info) in responses:
+            if result and info is not None:
+                self._brightness = info.brightness
+
+
+class NooLiteRGBLedModule(NooLiteModule):
+
+    def __init__(self, hass, config):
+        super().__init__(hass, config)
+        self._rgb = None
+        self._brightness = None
+
+    @property
+    def brightness(self):
+        return self._brightness
+
+    @brightness.setter
+    def brightness(self, brightness):
+        DEVICE.set_brightness(brightness, None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
+
+    @property
+    def rgb_color(self):
+        """Return the RGB color value [int, int, int]."""
+        return self._rgb
+
+    @rgb_color.setter
+    def rgb_color(self, rgb):
+        DEVICE.set_rgb_brightness(rgb[0], rgb[1], rgb[2], None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
+
+    def _update_state_from(self, responses):
+        super()._update_state_from(responses)
+
+        for (result, info) in responses:
+            if result and info is not None:
+                self._brightness = info.brightness
+

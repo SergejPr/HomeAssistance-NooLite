@@ -1,21 +1,51 @@
 import logging
+import voluptuous as vol
 
+from homeassistant.helpers import config_validation as cv
+from homeassistant.const import CONF_TYPE
 from homeassistant.components.light import Light
-from custom_components.NooLite import NooLiteModule
+from custom_components.NooLite import PLATFORM_SCHEMA
+from custom_components.NooLite import NooLiteModule, NooLiteDimmerModule, NooLiteRGBLedModule
+from custom_components.NooLite import CONF_BROADCAST
 
 
 DEPENDENCIES = ['NooLite']
 
 _LOGGER = logging.getLogger(__name__)
 
-CONF_MODULE = 'module'
+TYPES = ['Light', 'Dimmer', 'RGBLed']
+
+PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
+    vol.Optional(CONF_TYPE, default='Light'): vol.In(TYPES),
+    vol.Optional(CONF_BROADCAST, default=False): cv.boolean,
+})
 
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Setup the NooLite platform."""
     _LOGGER.info(config)
-    add_devices([NooLiteSwitch(hass, config)])
+
+    module_type = config.get(CONF_TYPE)
+
+    device = None
+    if module_type == 'Dimmer':
+        device = NooLiteDimmerSwitch(hass, config)
+    elif module_type == 'RGBLed':
+        device = NooLiteRGBLedSwitch(hass, config)
+    elif module_type == 'Light':
+        device = NooLiteSwitch(hass, config)
+
+    if device is not None:
+        add_devices([device])
 
 
 class NooLiteSwitch(NooLiteModule, Light):
+    pass
+
+
+class NooLiteDimmerSwitch(NooLiteDimmerModule, Light):
+    pass
+
+
+class NooLiteRGBLedSwitch(NooLiteRGBLedModule, Light):
     pass
