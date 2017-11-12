@@ -1,8 +1,23 @@
+#default_view:
+#  view: yes
+#  icon: mdi:home
+#  entities:
+#    - group.weather
+#    - group.rooms_group
+#    - sensor.room_sensor_temp
+#    - sensor.room_sensor_humi
+#    - group.all_automations
+#    - group.all_devices
+#    - group.all_scripts
+
 Living Room:
   entities:
+    - updater.updater
     - light.room_light
     - light.room_work_lights
     - light.room_light_rgb
+    - sensor.room_sensor_temp
+    - sensor.room_sensor_humi
 
 Kitchen:
   entities:
@@ -11,6 +26,7 @@ Kitchen:
 Hall:
   entities:
     - light.hall_light
+    - binary_sensor.hall_motion
 
 Bathroom:
   entities:
@@ -29,3 +45,24 @@ Rooms:
     - group.hall
     - group.bathroom
     - group.wc
+
+#rooms_group:
+#  view: no
+#  name: Rooms
+#  entities:
+#    - group.living_room
+#    - group.kitchen
+#    - group.hall
+#    - group.bathroom
+#    - group.wc
+
+#people:
+#  name: People
+#  entities:
+#    - device_tracker.iphone_sergej
+
+Weather:
+  entities:
+    - sensor.yr_symbol
+    - sun.sun
+

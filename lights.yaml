@@ -1,0 +1,42 @@
+- platform: NooLite
+  channel: 0
+  name: "room_light"
+  scan_interval: 60
+  mode: NooLite-F
+
+- platform: NooLite
+  channel: 1
+  name: "room_work_lights"
+  mode: NooLite-F
+  scan_interval: 60
+  broadcast: True
+
+- platform: NooLite
+  channel: 7
+  name: "room_light_rgb"
+  scan_interval: 60
+  mode: NooLite-F
+
+- platform: NooLite
+  channel: 2
+  name: "kitchen_light"
+  scan_interval: 60
+  mode: NooLite-F
+
+- platform: NooLite
+  channel: 4
+  name: "bathroom_light"
+  scan_interval: 60
+  mode: NooLite-F
+
+- platform: NooLite
+  channel: 5
+  name: "wc_light"
+  scan_interval: 60
+  mode: NooLite-F
+
+- platform: NooLite
+  channel: 6
+  name: "hall_light"
+  scan_interval: 60
+  mode: NooLite-F

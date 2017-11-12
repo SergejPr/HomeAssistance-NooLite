@@ -1,20 +1,27 @@
 light.room_light:
-    friendly_name: "Light"
-
+  friendly_name: Light
 light.room_work_lights:
-    friendly_name: "Work area light"
-
+  friendly_name: Work area light
 light.room_light_rgb:
-    friendly_name: "RGB Light"
+  friendly_name: RGB Light
+sensor.room_sensor_temp:
+  friendly_name: Temperature
+sensor.room_sensor_humi:
+  friendly_name: Humidity
 
 light.kitchen_light:
-    friendly_name: "Light"
+  friendly_name: Light
 
 light.wc_light:
-    friendly_name: "Light"
+  friendly_name: Light
 
 light.bathroom_light:
-    friendly_name: "Light"
+  friendly_name: Light
 
 light.hall_light:
-    friendly_name: "Light"
+  friendly_name: Light
+binary_sensor.hall_motion:
+  friendly_name: Motion
+
+sensor.yr_symbol:
+  friendly_name: Temperature

@@ -1,0 +1,11 @@
+# Weather prediction
+- platform: yr
+
+- platform: NooLite
+  channel: 9
+  name: "room_sensor"
+  mode: NooLite
+  type: TempHumi
+
+
+

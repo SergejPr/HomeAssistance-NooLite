@@ -2,8 +2,8 @@ homeassistant:
   # Name of the location where Home Assistant is running
   name: Home
   # Location required to calculate the time the sun rises and sets
-  latitude: 53.853501
-  longitude: 27.465112
+  latitude: 53
+  longitude: 28
   # Impacts weather/sunrise data (altitude above sea level in meters)
   elevation: 144
   # metric for Metric, imperial for Imperial
@@ -24,9 +24,11 @@ config:
 
 http:
   # Secrets are defined in the file secrets.yaml
-  # api_password: !secret http_password
+  api_password: !secret http_password
   # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
-  # base_url: example.duckdns.org:8123
+  base_url: !secret base_url
+  ssl_certificate: !secret private_ssl_certificate
+  ssl_key: !secret private_ssl_key
 
 # Checks for available updates
 # Note: This component will send some information about your system to
@@ -38,7 +40,7 @@ updater:
   # include_used_components: true
 
 # Discover some devices automatically
-# discovery:
+discovery:
 
 # Allows you to issue voice commands from the frontend in enabled browsers
 conversation:
@@ -55,10 +57,6 @@ map:
 # Track the sun
 sun:
 
-# Weather prediction
-sensor:
-  - platform: yr
-
 # Text to speech
 tts:
   - platform: google
@@ -67,50 +65,13 @@ group: !include groups.yaml
 automation: !include automations.yaml
 script: !include scripts.yaml
 
-zone:
-  - name: Home
-    latitude: 53.853494
-    longitude: 27.465315
-    radius: 50
-    icon: mdi:home
+ios:
+
+zone: !include zones.yaml
 
 NooLite:
-  port: "COM3"
+  port: "/dev/ttyUSB0"
 
-light:
-  - platform: NooLite
-    channel: 0
-    name: "room_light"
-    type: NooLite-F 
-
-  - platform: NooLite
-    channel: 1
-    name: "room_work_lights"
-    type: NooLite-F 
-    broadcast: True
-
-  - platform: NooLite
-    channel: 7
-    name: "room_light_rgb"
-    type: NooLite-F 
-
-  - platform: NooLite
-    channel: 2
-    name: "kitchen_light"
-    type: NooLite-F 
-
-  - platform: NooLite
-    channel: 4
-    name: "bathroom_light"
-    type: NooLite-F 
-
-  - platform: NooLite
-    channel: 5
-    name: "wc_light"
-    type: NooLite-F 
-
-  - platform: NooLite
-    channel: 6
-    name: "hall_light"
-    type: NooLite-F 
-
+light: !include lights.yaml
+sensor: !include sensors.yaml
+binary_sensor: !include binary_sensors.yaml

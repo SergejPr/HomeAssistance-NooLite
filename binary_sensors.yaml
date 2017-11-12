@@ -1,0 +1,5 @@
+- platform: NooLite
+  channel: 10
+  name: "hall_motion"
+  mode: NooLite
+  type: Motion
