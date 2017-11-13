@@ -12,6 +12,12 @@ from homeassistant.const import EVENT_HOMEASSISTANT_STOP
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers import config_validation as cv
 
+
+from homeassistant.components.light import (
+    ATTR_BRIGHTNESS, ATTR_EFFECT, ATTR_RGB_COLOR,
+    SUPPORT_BRIGHTNESS, SUPPORT_EFFECT, SUPPORT_RGB_COLOR)
+
+
 REQUIREMENTS = ['NooLite-F==0.0.15']
 
 _LOGGER = logging.getLogger(__name__)
@@ -100,19 +106,29 @@ class NooLiteModule(Entity):
 
     def turn_on(self, **kwargs):
         responses = DEVICE.on(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
-        self._update_state_from(responses)
+        if self.assumed_state:
+            self._state = True
+        else:
+            self._update_state_from(responses)
 
     def turn_off(self, **kwargs):
         responses = DEVICE.off(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
-        self._update_state_from(responses)
+        if self.assumed_state:
+            self._state = False
+        else:
+            self._update_state_from(responses)
 
     def toggle(self, **kwargs) -> None:
         responses = DEVICE.switch(None, self._config.channel, self._config.broadcast)
-        self._update_state_from(responses)
+        if self.assumed_state:
+            self._state = not self._state
+        else:
+            self._update_state_from(responses)
 
     def update(self):
-        responses = DEVICE.read_state(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
-        self._update_state_from(responses)
+        if not self.assumed_state:
+            responses = DEVICE.read_state(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
+            self._update_state_from(responses)
 
     def _update_state_from(self, responses):
         from NooLite_F import ModuleState
@@ -130,52 +146,77 @@ class NooLiteDimmerModule(NooLiteModule):
 
     def __init__(self, hass, config):
         super().__init__(hass, config)
-        self._brightness = None
+        self._brightness = 255
+
+    @property
+    def supported_features(self) -> int:
+        return SUPPORT_BRIGHTNESS
 
     @property
     def brightness(self):
         return self._brightness
-
-    @brightness.setter
-    def brightness(self, brightness):
-        DEVICE.set_brightness(brightness, None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
 
     def _update_state_from(self, responses):
         super()._update_state_from(responses)
 
         for (result, info) in responses:
             if result and info is not None:
-                self._brightness = info.brightness
+                self._brightness = info.brightness * 255
+
+    def turn_on(self, **kwargs):
+        brightness = kwargs.get(ATTR_BRIGHTNESS)
+        if brightness is not None:
+            self._brightness = brightness
+
+        responses = DEVICE.set_brightness(self._brightness / 255, None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
+        if self.assumed_state:
+            self._state = True
+        else:
+            self._update_state_from(responses)
 
 
 class NooLiteRGBLedModule(NooLiteModule):
 
     def __init__(self, hass, config):
         super().__init__(hass, config)
-        self._rgb = None
-        self._brightness = None
+        self._brightness = 255
+        self._rgb = [255, 255, 255]
+
+    @property
+    def supported_features(self) -> int:
+        return SUPPORT_RGB_COLOR | SUPPORT_BRIGHTNESS
+
+    @property
+    def rgb_color(self):
+        return self._rgb
 
     @property
     def brightness(self):
         return self._brightness
-
-    @brightness.setter
-    def brightness(self, brightness):
-        DEVICE.set_brightness(brightness, None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
-
-    @property
-    def rgb_color(self):
-        """Return the RGB color value [int, int, int]."""
-        return self._rgb
-
-    @rgb_color.setter
-    def rgb_color(self, rgb):
-        DEVICE.set_rgb_brightness(rgb[0], rgb[1], rgb[2], None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
 
     def _update_state_from(self, responses):
         super()._update_state_from(responses)
 
         for (result, info) in responses:
             if result and info is not None:
-                self._brightness = info.brightness
+                self._brightness = info.brightness * 255
 
+    def turn_on(self, **kwargs):
+        rgb = kwargs.get(ATTR_RGB_COLOR)
+        if rgb is not None:
+            self._rgb = rgb
+
+        brightness = kwargs.get(ATTR_BRIGHTNESS)
+        if brightness is not None:
+            self._brightness = brightness
+
+        brightness_multiplier = self._brightness / 255
+        red = (self._rgb[0] * brightness_multiplier) / 255
+        green = (self._rgb[1] * brightness_multiplier) / 255 
+        blue = (self._rgb[2] * brightness_multiplier) / 255 
+
+        responses = DEVICE.set_rgb_brightness(red, green, blue, None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
+        if self.assumed_state:
+            self._state = True
+        else:
+            self._update_state_from(responses)
