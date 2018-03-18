@@ -13,11 +13,11 @@
 Living Room:
   entities:
     - updater.updater
-    - light.room_light
-    - light.room_work_lights
-    - light.room_light_rgb
-    - sensor.room_sensor_temp
-    - sensor.room_sensor_humi
+    - light.living_room_light
+    - light.living_room_work_lights
+    - light.living_room_light_rgb
+    - sensor.living_room_sensor_temp
+    - sensor.living_room_sensor_humi
 
 Kitchen:
   entities:

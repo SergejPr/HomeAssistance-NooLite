@@ -1,19 +1,19 @@
 - platform: NooLite
   channel: 0
-  name: "room_light"
+  name: "living_room_light"
   scan_interval: 60
   mode: NooLite-F
 
 - platform: NooLite
   channel: 1
-  name: "room_work_lights"
+  name: "living_room_work_lights"
   mode: NooLite-F
   scan_interval: 60
   broadcast: True
 
 - platform: NooLite
   channel: 7
-  name: "room_light_rgb"
+  name: "living_room_light_rgb"
   scan_interval: 60
   mode: NooLite-F
 

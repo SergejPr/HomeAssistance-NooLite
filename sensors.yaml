@@ -3,7 +3,7 @@
 
 - platform: NooLite
   channel: 9
-  name: "room_sensor"
+  name: "living_room_sensor"
   mode: NooLite
   type: TempHumi
 
