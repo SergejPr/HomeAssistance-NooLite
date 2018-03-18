@@ -18,7 +18,7 @@ from homeassistant.components.light import (
     SUPPORT_BRIGHTNESS, SUPPORT_EFFECT, SUPPORT_RGB_COLOR)
 
 
-REQUIREMENTS = ['NooLite-F==0.0.15']
+REQUIREMENTS = ['NooLite-F==0.0.17']
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -119,7 +119,7 @@ class NooLiteModule(Entity):
             self._update_state_from(responses)
 
     def toggle(self, **kwargs) -> None:
-        responses = DEVICE.switch(None, self._config.channel, self._config.broadcast)
+        responses = DEVICE.switch(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
         if self.assumed_state:
             self._state = not self._state
         else:
@@ -130,14 +130,16 @@ class NooLiteModule(Entity):
             responses = DEVICE.read_state(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
             self._update_state_from(responses)
 
-    def _update_state_from(self, responses):
+    def _is_module_on(self, module_state) -> bool:
         from NooLite_F import ModuleState
+        return module_state.state == ModuleState.ON or module_state.state == ModuleState.TEMPORARY_ON
+
+    def _update_state_from(self, responses):
 
         state = False
-        for (result, info) in responses:
-            if result and info is not None:
-                if info.state == ModuleState.ON or info.state == ModuleState.TEMPORARY_ON:
-                    state = True
+        for (result, info, module_state) in responses:
+            if result and module_state is not None:
+                state = state or self._is_module_on(module_state)
 
         self._state = state
 
@@ -158,19 +160,19 @@ class NooLiteDimmerModule(NooLiteModule):
 
     def _update_state_from(self, responses):
         super()._update_state_from(responses)
-
-        for (result, info) in responses:
-            if result and info is not None:
-                self._brightness = info.brightness * 255
+        for (result, info, module_state) in responses:
+            if result and module_state is not None and super()._is_module_on(module_state):
+                self._brightness = module_state.brightness * 255
 
     def turn_on(self, **kwargs):
         brightness = kwargs.get(ATTR_BRIGHTNESS)
-        if brightness is not None:
-            self._brightness = brightness
+        if brightness is None:
+            brightness = self._brightness
 
-        responses = DEVICE.set_brightness(self._brightness / 255, None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
+        responses = DEVICE.set_brightness(brightness / 255, None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
         if self.assumed_state:
             self._state = True
+            self._brightness = brightness
         else:
             self._update_state_from(responses)
 
@@ -196,10 +198,9 @@ class NooLiteRGBLedModule(NooLiteModule):
 
     def _update_state_from(self, responses):
         super()._update_state_from(responses)
-
-        for (result, info) in responses:
-            if result and info is not None:
-                self._brightness = info.brightness * 255
+        for (result, info, module_state) in responses:
+            if result and module_state is not None and super()._is_module_on(module_state):
+                self._brightness = module_state.brightness * 255
 
     def turn_on(self, **kwargs):
         rgb = kwargs.get(ATTR_RGB_COLOR)
