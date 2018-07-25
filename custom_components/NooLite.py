@@ -15,7 +15,7 @@ from homeassistant.helpers import config_validation as cv
 
 from homeassistant.components.light import (
     ATTR_BRIGHTNESS, ATTR_EFFECT, ATTR_RGB_COLOR,
-    SUPPORT_BRIGHTNESS, SUPPORT_EFFECT, SUPPORT_RGB_COLOR)
+    SUPPORT_BRIGHTNESS, SUPPORT_EFFECT, SUPPORT_COLOR)
 
 
 REQUIREMENTS = ['NooLite-F==0.0.17']
@@ -186,7 +186,7 @@ class NooLiteRGBLedModule(NooLiteModule):
 
     @property
     def supported_features(self) -> int:
-        return SUPPORT_RGB_COLOR | SUPPORT_BRIGHTNESS
+        return SUPPORT_COLOR | SUPPORT_BRIGHTNESS
 
     @property
     def rgb_color(self):
