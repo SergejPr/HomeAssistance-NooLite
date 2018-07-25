@@ -6,9 +6,10 @@ from threading import Timer
 
 from homeassistant.const import CONF_TYPE
 from homeassistant.components.binary_sensor import BinarySensorDevice
+from homeassistant.helpers import config_validation as cv
 
 from custom_components.NooLite import PLATFORM_SCHEMA
-from custom_components.NooLite import CONF_CHANNEL, CONF_NAME
+from custom_components.NooLite import CONF_CHANNEL, CONF_NAME, CONF_MODE
 from custom_components import NooLite
 
 
@@ -20,6 +21,9 @@ TYPES = ['Motion']
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_TYPE, 'Motion'): vol.In(TYPES),
+    vol.Required(CONF_NAME): cv.string,
+    vol.Required(CONF_CHANNEL): cv.positive_int,
+    vol.Required(CONF_MODE): cv.string,
 })
 
 

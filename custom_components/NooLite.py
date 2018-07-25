@@ -40,9 +40,6 @@ CONFIG_SCHEMA = vol.Schema({
 
 
 PLATFORM_SCHEMA = vol.Schema({
-    vol.Required(CONF_NAME): cv.string,
-    vol.Required(CONF_CHANNEL): cv.positive_int,
-    vol.Required(CONF_MODE): cv.string,
 }, extra=vol.ALLOW_EXTRA)
 
 
