@@ -3,20 +3,18 @@ Support for NooLite.
 """
 
 import logging
+
 import voluptuous as vol
-
-from homeassistant.const import CONF_NAME, CONF_PORT, CONF_MODE
-from homeassistant.const import STATE_UNKNOWN
-from homeassistant.const import EVENT_HOMEASSISTANT_STOP
-
-from homeassistant.helpers.entity import Entity
-from homeassistant.helpers import config_validation as cv
-
-
+from homeassistant.components.fan import (SPEED_LOW, SPEED_MEDIUM, SPEED_HIGH)
 from homeassistant.components.light import (
-    ATTR_BRIGHTNESS, ATTR_EFFECT, ATTR_RGB_COLOR,
-    SUPPORT_BRIGHTNESS, SUPPORT_EFFECT, SUPPORT_COLOR)
-
+    ATTR_BRIGHTNESS, ATTR_RGB_COLOR,
+    SUPPORT_BRIGHTNESS, SUPPORT_COLOR)
+from homeassistant.const import CONF_NAME, CONF_PORT, CONF_MODE
+from homeassistant.const import EVENT_HOMEASSISTANT_STOP
+from homeassistant.const import STATE_OFF
+from homeassistant.const import STATE_UNKNOWN
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.entity import Entity
 
 REQUIREMENTS = ['NooLite-F==0.0.17']
 
@@ -31,13 +29,11 @@ DEFAULT_PORT = '/dev/ttyUSB0'
 
 DEVICE = None
 
-
 CONFIG_SCHEMA = vol.Schema({
     DOMAIN: vol.Schema({
         vol.Optional(CONF_PORT, default=DEFAULT_PORT): cv.string,
     }),
 }, extra=vol.ALLOW_EXTRA)
-
 
 PLATFORM_SCHEMA = vol.Schema({
 }, extra=vol.ALLOW_EXTRA)
@@ -102,21 +98,24 @@ class NooLiteModule(Entity):
         return _module_mode(self._config) == ModuleMode.NOOLITE
 
     def turn_on(self, **kwargs):
-        responses = DEVICE.on(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
+        responses = DEVICE.on(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST),
+                              _module_mode(self._config))
         if self.assumed_state:
             self._state = True
         else:
             self._update_state_from(responses)
 
     def turn_off(self, **kwargs):
-        responses = DEVICE.off(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
+        responses = DEVICE.off(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST),
+                               _module_mode(self._config))
         if self.assumed_state:
             self._state = False
         else:
             self._update_state_from(responses)
 
     def toggle(self, **kwargs) -> None:
-        responses = DEVICE.switch(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
+        responses = DEVICE.switch(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST),
+                                  _module_mode(self._config))
         if self.assumed_state:
             self._state = not self._state
         else:
@@ -124,7 +123,8 @@ class NooLiteModule(Entity):
 
     def update(self):
         if not self.assumed_state:
-            responses = DEVICE.read_state(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
+            responses = DEVICE.read_state(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST),
+                                          _module_mode(self._config))
             self._update_state_from(responses)
 
     def _is_module_on(self, module_state) -> bool:
@@ -166,12 +166,111 @@ class NooLiteDimmerModule(NooLiteModule):
         if brightness is None:
             brightness = self._brightness
 
-        responses = DEVICE.set_brightness(brightness / 255, None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
+        responses = DEVICE.set_brightness(brightness / 255, None, self._config.get(CONF_CHANNEL),
+                                          self._config.get(CONF_BROADCAST), _module_mode(self._config))
         if self.assumed_state:
             self._state = True
             self._brightness = brightness
         else:
             self._update_state_from(responses)
+
+
+class NooLiteFanModule(NooLiteModule):
+
+    def __init__(self, hass, config):
+        super().__init__(hass, config)
+        self.hass = hass
+        self._speed = STATE_OFF
+        self.oscillating = None
+        self.direction = None
+        self.oscillating = False
+        self.direction = "forward"
+
+    @property
+    def should_poll(self):
+        """No polling needed for a fan."""
+        return False
+
+    @property
+    def speed(self) -> str:
+        """Return the current speed."""
+        return self._speed
+
+    @property
+    def speed_list(self) -> list:
+        """Get the list of available speeds."""
+        return [STATE_OFF, SPEED_LOW, SPEED_MEDIUM, SPEED_HIGH]
+
+    def turn_on(self, speed: str = None, **kwargs) -> None:
+        """Turn on the entity."""
+        if speed is None:
+            speed = SPEED_MEDIUM
+        self.set_speed(speed)
+
+    def turn_off(self, **kwargs) -> None:
+        """Turn off the entity."""
+        self.oscillate(False)
+        self.set_speed(STATE_OFF)
+
+    def set_speed(self, speed: str) -> None:
+        """Set the speed of the fan."""
+
+        if speed is None:
+            speed = self._speed
+        int_speed = 0
+
+        if speed == SPEED_HIGH:
+            int_speed = 255
+        elif speed == SPEED_MEDIUM:
+            int_speed = 180
+        elif speed == SPEED_LOW:
+            int_speed = 70
+
+        responses = DEVICE.set_speed(int_speed / 255, None, self._config.get(CONF_CHANNEL),
+                                     self._config.get(CONF_BROADCAST), _module_mode(self._config))
+        if self.assumed_state:
+            self._state = True
+            self._speed = speed
+        else:
+            self._update_state_from(responses)
+
+        self.schedule_update_ha_state()
+
+    def set_direction(self, direction: str) -> None:
+        """Set the direction of the fan."""
+        self.direction = direction
+        self.schedule_update_ha_state()
+
+    def oscillate(self, oscillating: bool) -> None:
+        """Set oscillation."""
+        self.oscillating = oscillating
+        self.schedule_update_ha_state()
+
+    @property
+    def current_direction(self) -> str:
+        """Fan direction."""
+        return self.direction
+
+    @property
+    def supported_features(self) -> int:
+        """Flag supported features."""
+        return 0
+
+    def _update_state_from(self, responses):
+        super()._update_state_from(responses)
+        for (result, info, module_state) in responses:
+            if result and module_state is not None and super()._is_module_on(module_state):
+
+                int_speed = int(module_state.speed * 255)
+
+                if int_speed == 255:
+                    self._speed = SPEED_HIGH
+                elif int_speed == 180:
+                    self._speed = SPEED_MEDIUM
+                elif int_speed == 80:
+                    self._speed = SPEED_LOW
+                else:
+                    self._speed = STATE_OFF
 
 
 class NooLiteRGBLedModule(NooLiteModule):
@@ -210,10 +309,11 @@ class NooLiteRGBLedModule(NooLiteModule):
 
         brightness_multiplier = self._brightness / 255
         red = (self._rgb[0] * brightness_multiplier) / 255
-        green = (self._rgb[1] * brightness_multiplier) / 255 
-        blue = (self._rgb[2] * brightness_multiplier) / 255 
+        green = (self._rgb[1] * brightness_multiplier) / 255
+        blue = (self._rgb[2] * brightness_multiplier) / 255
 
-        responses = DEVICE.set_rgb_brightness(red, green, blue, None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST), _module_mode(self._config))
+        responses = DEVICE.set_rgb_brightness(red, green, blue, None, self._config.get(CONF_CHANNEL),
+                                              self._config.get(CONF_BROADCAST), _module_mode(self._config))
         if self.assumed_state:
             self._state = True
         else:
