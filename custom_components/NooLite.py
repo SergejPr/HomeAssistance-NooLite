@@ -181,10 +181,11 @@ class NooLiteFanModule(NooLiteModule):
         super().__init__(hass, config)
         self.hass = hass
         self._speed = STATE_OFF
-        self.oscillating = None
-        self.direction = None
-        self.oscillating = False
-        self.direction = "forward"
+
+    @property
+    def is_on(self):
+        """Return true if device is on."""
+        return self._speed != STATE_OFF
 
     @property
     def should_poll(self):
@@ -209,7 +210,6 @@ class NooLiteFanModule(NooLiteModule):
 
     def turn_off(self, **kwargs) -> None:
         """Turn off the entity."""
-        self.oscillate(False)
         self.set_speed(STATE_OFF)
 
     def set_speed(self, speed: str) -> None:
@@ -236,21 +236,6 @@ class NooLiteFanModule(NooLiteModule):
 
         self.schedule_update_ha_state()
 
-    def set_direction(self, direction: str) -> None:
-        """Set the direction of the fan."""
-        self.direction = direction
-        self.schedule_update_ha_state()
-
-    def oscillate(self, oscillating: bool) -> None:
-        """Set oscillation."""
-        self.oscillating = oscillating
-        self.schedule_update_ha_state()
-
-    @property
-    def current_direction(self) -> str:
-        """Fan direction."""
-        return self.direction
-
     @property
     def supported_features(self) -> int:
         """Flag supported features."""
@@ -263,14 +248,17 @@ class NooLiteFanModule(NooLiteModule):
 
                 int_speed = int(module_state.speed * 255)
 
-                if int_speed == 255:
-                    self._speed = SPEED_HIGH
-                elif int_speed == 180:
-                    self._speed = SPEED_MEDIUM
-                elif int_speed == 80:
+                self._speed = STATE_OFF
+
+                if 0 < int_speed <= 80:
                     self._speed = SPEED_LOW
-                else:
-                    self._speed = STATE_OFF
+
+                if 80 < int_speed <= 180:
+                    self._speed = SPEED_MEDIUM
+
+                if 180 < int_speed:
+                    self._speed = SPEED_HIGH
+
 
 
 class NooLiteRGBLedModule(NooLiteModule):
