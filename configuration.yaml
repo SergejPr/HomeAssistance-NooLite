@@ -14,7 +14,7 @@ homeassistant:
   customize: !include customize.yaml
 
 # Show links to resources in log and frontend
-introduction:
+# introduction:
 
 # Enables the frontend
 frontend:
@@ -72,6 +72,7 @@ zone: !include zones.yaml
 NooLite:
   port: "/dev/ttyUSB0"
 
+vacuum: !include vacuum.yaml
 light: !include lights.yaml
 sensor: !include sensors.yaml
 binary_sensor: !include binary_sensors.yaml
