@@ -9,6 +9,7 @@
   name: "living_room_work_lights"
   mode: NooLite-F
   scan_interval: 60
+  type: Dimmer
   broadcast: True
 
 - platform: NooLite
@@ -21,6 +22,7 @@
   channel: 2
   name: "kitchen_light"
   scan_interval: 60
+  type: Dimmer
   mode: NooLite-F
 
 - platform: NooLite
@@ -39,4 +41,12 @@
   channel: 6
   name: "hall_light"
   scan_interval: 60
+  type: Dimmer
+  mode: NooLite-F
+
+- platform: NooLite
+  channel: 8
+  name: "hall_extra_light"
+  scan_interval: 60
+  type: Dimmer
   mode: NooLite-F

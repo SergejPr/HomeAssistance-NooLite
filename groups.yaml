@@ -26,6 +26,7 @@ Kitchen:
 Hall:
   entities:
     - light.hall_light
+    - light.hall_extra_light
     - binary_sensor.hall_motion
 
 Bathroom:
