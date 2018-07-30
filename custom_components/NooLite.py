@@ -16,7 +16,7 @@ from homeassistant.const import STATE_UNKNOWN
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.entity import Entity
 
-REQUIREMENTS = ['https://github.com/mrukavishnikov/NooLite-F/archive/0.0.17.1.zip#NooLite-F==0.0.17.1']
+REQUIREMENTS = ['NooLite-F==0.0.19']
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -75,7 +75,6 @@ def _module_mode(config):
 
 
 class NooLiteModule(Entity):
-
     def __init__(self, hass, config):
         self._config = config
         self._state = STATE_UNKNOWN
@@ -142,7 +141,6 @@ class NooLiteModule(Entity):
 
 
 class NooLiteDimmerModule(NooLiteModule):
-
     def __init__(self, hass, config):
         super().__init__(hass, config)
         self._brightness = 255
@@ -176,7 +174,6 @@ class NooLiteDimmerModule(NooLiteModule):
 
 
 class NooLiteFanModule(NooLiteModule):
-
     def __init__(self, hass, config):
         super().__init__(hass, config)
         self.hass = hass
@@ -226,8 +223,8 @@ class NooLiteFanModule(NooLiteModule):
         elif speed == SPEED_LOW:
             int_speed = 70
 
-        responses = DEVICE.set_speed(int_speed / 255, None, self._config.get(CONF_CHANNEL),
-                                     self._config.get(CONF_BROADCAST), _module_mode(self._config))
+        responses = DEVICE.set_brightness(int_speed / 255, None, self._config.get(CONF_CHANNEL),
+                                          self._config.get(CONF_BROADCAST), _module_mode(self._config))
         if self.assumed_state:
             self._state = True
             self._speed = speed
@@ -246,7 +243,7 @@ class NooLiteFanModule(NooLiteModule):
         for (result, info, module_state) in responses:
             if result and module_state is not None and super()._is_module_on(module_state):
 
-                int_speed = int(module_state.speed * 255)
+                int_speed = int(module_state.brightness * 255)
 
                 self._speed = STATE_OFF
 
@@ -260,9 +257,7 @@ class NooLiteFanModule(NooLiteModule):
                     self._speed = SPEED_HIGH
 
 
-
 class NooLiteRGBLedModule(NooLiteModule):
-
     def __init__(self, hass, config):
         super().__init__(hass, config)
         self._brightness = 255
