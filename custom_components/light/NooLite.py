@@ -6,10 +6,12 @@ from homeassistant.const import CONF_TYPE
 from homeassistant.components.light import Light
 from custom_components.NooLite import PLATFORM_SCHEMA
 from custom_components.NooLite import NooLiteModule, NooLiteDimmerModule, NooLiteRGBLedModule
-from custom_components.NooLite import CONF_BROADCAST
+from custom_components.NooLite import CONF_BROADCAST, CONF_CHANNEL
+from homeassistant.const import CONF_NAME, CONF_PORT, CONF_MODE
 
 
 DEPENDENCIES = ['NooLite']
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -18,6 +20,9 @@ TYPES = ['Light', 'Dimmer', 'RGBLed']
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_TYPE, default='Light'): vol.In(TYPES),
     vol.Optional(CONF_BROADCAST, default=False): cv.boolean,
+    vol.Required(CONF_NAME): cv.string,
+    vol.Required(CONF_CHANNEL): cv.positive_int,
+    vol.Required(CONF_MODE): cv.string,
 })
 
 

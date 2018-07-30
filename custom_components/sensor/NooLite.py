@@ -5,8 +5,9 @@ from homeassistant.const import CONF_TYPE, STATE_UNKNOWN, TEMP_CELSIUS
 from homeassistant.helpers.entity import Entity
 
 from custom_components.NooLite import PLATFORM_SCHEMA
-from custom_components.NooLite import CONF_CHANNEL, CONF_NAME
+from custom_components.NooLite import CONF_CHANNEL, CONF_NAME, CONF_MODE
 from custom_components import NooLite
+from homeassistant.helpers import config_validation as cv
 
 DEPENDENCIES = ['NooLite']
 
@@ -19,6 +20,9 @@ MEASUREMENT_PERCENTS = "%"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_TYPE): vol.In(TYPES),
+    vol.Required(CONF_NAME): cv.string,
+    vol.Required(CONF_CHANNEL): cv.positive_int,
+    vol.Required(CONF_MODE): cv.string,
 })
 
 
