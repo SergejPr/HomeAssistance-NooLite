@@ -16,7 +16,7 @@ from homeassistant.const import STATE_UNKNOWN
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.entity import Entity
 
-REQUIREMENTS = ['NooLite-F==0.0.19']
+REQUIREMENTS = ['NooLite-F==0.0.20']
 
 _LOGGER = logging.getLogger(__name__)
 

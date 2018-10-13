@@ -6,12 +6,13 @@ from typing import Optional
 from threading import Timer
 
 from homeassistant.const import CONF_TYPE, STATE_OFF, STATE_ON
+from homeassistant.const import CONF_NAME, CONF_MODE
 from homeassistant.components.binary_sensor import BinarySensorDevice
 from homeassistant.helpers import config_validation as cv
 
-from custom_components.NooLite import PLATFORM_SCHEMA
-from custom_components.NooLite import CONF_CHANNEL, CONF_NAME, CONF_MODE
 from custom_components import NooLite
+from custom_components.NooLite import PLATFORM_SCHEMA
+from custom_components.NooLite import CONF_CHANNEL
 
 
 DEPENDENCIES = ['NooLite']

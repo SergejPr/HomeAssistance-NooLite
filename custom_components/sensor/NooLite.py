@@ -1,13 +1,14 @@
 import logging
 import voluptuous as vol
 
+from homeassistant.const import CONF_NAME, CONF_MODE
 from homeassistant.const import CONF_TYPE, STATE_UNKNOWN, TEMP_CELSIUS
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.entity import Entity
 
-from custom_components.NooLite import PLATFORM_SCHEMA
-from custom_components.NooLite import CONF_CHANNEL, CONF_NAME, CONF_MODE
 from custom_components import NooLite
-from homeassistant.helpers import config_validation as cv
+from custom_components.NooLite import PLATFORM_SCHEMA
+from custom_components.NooLite import CONF_CHANNEL
 
 DEPENDENCIES = ['NooLite']
 
