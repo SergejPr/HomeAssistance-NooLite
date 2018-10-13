@@ -1,33 +1,23 @@
-- alias: Turn on lights in morning
+- id: '1511381851678'
+  alias: Turn on aquarium lights
   trigger:
+  - at: '12:00:00'
     platform: time
-    at: 08:45:00
+  condition: []
   action:
-    service: light.turn_on
-    entity_id:
-    - light.living_room_light
-    - light.living_room_work_lights
-
-- alias: Turn off lights in midnight
-  trigger:
-    platform: time
-    at: 00:15:00
-  action:
-    service: light.turn_off
-    entity_id:
-    - light.living_room_light
-    - light.living_room_work_lights
-
-- action:
   - alias: Turn on room lights
     data:
       entity_id:
-      - light.living_room_light
-      - light.living_room_work_lights
+      - light.aquarium_light
     service: light.turn_on
-  alias: Turn on room lights
-  condition: []
-  id: '1511381851678'
+- id: '1533134805298'
+  alias: Turn off aquarium lights
   trigger:
-  - at: 06:30:00
+  - at: '20:00:00'
     platform: time
+  condition: []
+  action:
+  - data:
+      entity_id:
+      - light.aquarium_light
+    service: light.turn_off

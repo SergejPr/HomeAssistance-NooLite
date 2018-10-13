@@ -4,9 +4,9 @@ light.living_room_work_lights:
   friendly_name: Living Room Work Light
 light.living_room_light_rgb:
   friendly_name: Living Room RGB Light
-sensor.living_room_sensor_temp:
+sensor.living_room_sensor_temperature:
   friendly_name: Living Room Temperature
-sensor.living_room_sensor_humi:
+sensor.living_room_sensor_humidity:
   friendly_name: Living Room Humidity
 
 light.kitchen_light:
@@ -22,6 +22,9 @@ light.hall_light:
   friendly_name: Hall Light
 light.hall_extra_light:
   friendly_name: Hall Extra Light
+
+light.aquarium_light:
+  friendly_name: Aquarium Light
 
 binary_sensor.hall_motion:
   friendly_name: Motion

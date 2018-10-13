@@ -76,3 +76,4 @@ vacuum: !include vacuum.yaml
 light: !include lights.yaml
 sensor: !include sensors.yaml
 binary_sensor: !include binary_sensors.yaml
+homekit:

@@ -5,7 +5,6 @@ from typing import Optional
 
 from threading import Timer
 
-from homeassistant.helpers.entity import Entity
 from homeassistant.const import CONF_TYPE, STATE_OFF, STATE_ON
 from homeassistant.components.binary_sensor import BinarySensorDevice
 from homeassistant.helpers import config_validation as cv
@@ -37,7 +36,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
     devices = []
     if module_type == 'Motion':
-        devices.append(NooLiteMotionSensor(config, 'motion'))
+        devices.append(NooLiteMotionSensor(config))
     elif module_type == 'Remote':
         devices.append(NooLiteBinarySensor(config, 'power'))
 
@@ -46,10 +45,9 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
 class NooLiteMotionSensor(BinarySensorDevice):
 
-    def __init__(self, config, device_class):
+    def __init__(self, config):
         from NooLite_F import MotionSensor
         self._config = config
-        self._sensor_type = device_class
         self._sensor = MotionSensor(NooLite.DEVICE, config.get(CONF_CHANNEL), self._on_motion)
         self._time = time.time()
         self._timer = None
@@ -72,7 +70,7 @@ class NooLiteMotionSensor(BinarySensorDevice):
     @property
     def device_class(self):
         """Return the class of this sensor."""
-        return self._sensor_type
+        return "motion"
 
     @property
     def should_poll(self):
@@ -91,7 +89,7 @@ class NooLiteMotionSensor(BinarySensorDevice):
         pass
 
 
-class NooLiteBinarySensor(BinarySensorDevice, Entity):
+class NooLiteBinarySensor(BinarySensorDevice):
 
     def __init__(self, config, device_class):
         from NooLite_F import RemoteController

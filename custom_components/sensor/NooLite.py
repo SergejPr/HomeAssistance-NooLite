@@ -34,10 +34,10 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
     devices = []
     if module_type == 'TempHumi':
-        devices.append(NooLiteHumiSensor(hass, config))
-        devices.append(NooLiteTempSensor(hass, config))
+        devices.append(NooLiteHumiditySensor(hass, config))
+        devices.append(NooLiteTemperatureSensor(hass, config))
     elif module_type == 'Temp':
-        devices.append(NooLiteTempSensor(hass, config))
+        devices.append(NooLiteTemperatureSensor(hass, config))
     elif module_type == 'Analog':
         devices.append(NooLiteAnalogSensor(hass, config))
 
@@ -69,7 +69,7 @@ class NooLiteSensor(Entity):
         pass
 
 
-class NooLiteTempSensor(NooLiteSensor):
+class NooLiteTemperatureSensor(NooLiteSensor):
 
     def __init__(self, hass, config):
         super().__init__(hass, config)
@@ -82,14 +82,18 @@ class NooLiteTempSensor(NooLiteSensor):
 
     @property
     def name(self):
-        return super().name + "_temp"
+        return super().name + "_temperature"
 
     @property
     def unit_of_measurement(self):
         return TEMP_CELSIUS
 
+    @property
+    def device_class(self):
+        return "temperature"
 
-class NooLiteHumiSensor(NooLiteSensor):
+
+class NooLiteHumiditySensor(NooLiteSensor):
 
     def __init__(self, hass, config):
         super().__init__(hass, config)
@@ -102,11 +106,15 @@ class NooLiteHumiSensor(NooLiteSensor):
 
     @property
     def name(self):
-        return super().name + "_humi"
+        return super().name + "_humidity"
 
     @property
     def unit_of_measurement(self):
         return MEASUREMENT_PERCENTS
+
+    @property
+    def device_class(self):
+        return "humidity"
 
 
 class NooLiteAnalogSensor(NooLiteSensor):

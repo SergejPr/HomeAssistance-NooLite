@@ -16,8 +16,8 @@ Living Room:
     - light.living_room_light
     - light.living_room_work_lights
     - light.living_room_light_rgb
-    - sensor.living_room_sensor_temp
-    - sensor.living_room_sensor_humi
+    - sensor.living_room_sensor_temperature
+    - sensor.living_room_sensor_humidity
 
 Kitchen:
   entities:
@@ -37,6 +37,10 @@ WC:
   entities:
     - light.wc_light
 
+Aquarium:
+  entities:
+    - light.aquarium_light
+
 Rooms:
   view: yes
   name: Rooms
@@ -46,6 +50,12 @@ Rooms:
     - group.hall
     - group.bathroom
     - group.wc
+
+Aqua:
+  view: yes
+  name: Aquarium
+  entities:
+    - group.aquarium
 
 #rooms_group:
 #  view: no

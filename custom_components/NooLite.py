@@ -40,7 +40,7 @@ PLATFORM_SCHEMA = vol.Schema({
 
 
 def setup(hass, config):
-    """Set up the connection to the ZigBee device."""
+    """Set up the connection to the NooLite device."""
     global DEVICE
 
     from NooLite_F.MTRF64 import MTRF64Controller
