@@ -23,8 +23,8 @@ light.hall_light:
 light.hall_extra_light:
   friendly_name: Hall Extra Light
 
-light.aquarium_light:
-  friendly_name: Aquarium Light
+switch.aquarium_switch:
+  friendly_name: Aquarium Light Switch
 
 binary_sensor.hall_motion:
   friendly_name: Motion

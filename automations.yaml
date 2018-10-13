@@ -8,7 +8,7 @@
   - alias: Turn on room lights
     data:
       entity_id:
-      - light.aquarium_light
+      - switch.aquarium_switch
     service: light.turn_on
 - id: '1533134805298'
   alias: Turn off aquarium lights
@@ -19,5 +19,5 @@
   action:
   - data:
       entity_id:
-      - light.aquarium_light
+      - switch.aquarium_switch
     service: light.turn_off

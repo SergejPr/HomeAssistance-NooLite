@@ -39,7 +39,7 @@ WC:
 
 Aquarium:
   entities:
-    - light.aquarium_light
+    - switch.aquarium_switch
 
 Rooms:
   view: yes

@@ -51,9 +51,3 @@
   scan_interval: 60
   type: Dimmer
   mode: NooLite-F
-
-- platform: NooLite
-  channel: 11
-  name: "aquarium_light"
-  scan_interval: 60
-  mode: NooLite-F
