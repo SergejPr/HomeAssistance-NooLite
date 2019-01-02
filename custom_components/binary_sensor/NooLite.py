@@ -126,9 +126,10 @@ class NooLiteBinarySensor(BinarySensorDevice):
         self.schedule_update_ha_state()
 
     def _on_switch(self):
-        self._timer.cancel()
+        if self._timer is not None:
+            self._timer.cancel()
         self._timer = None
-        self._switch_on() if self.is_on else self._switch_off()
+        self._switch_on() if not self.is_on else self._switch_off()
         self.schedule_update_ha_state()
 
     def _on_load_preset(self):
