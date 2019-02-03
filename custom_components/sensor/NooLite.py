@@ -135,3 +135,69 @@ class NooLiteAnalogSensor(NooLiteSensor):
     @property
     def unit_of_measurement(self):
         return ""
+
+
+class NooLiteRemoteSensor(NooLiteSensor):
+    def __init__(self, hass, config):
+        super().__init__(hass, config)
+        from NooLite_F import RemoteController
+        self._config = config
+        self._sensor = RemoteController(controller=NooLite.DEVICE, 
+                                        channel=config.get(CONF_CHANNEL), 
+                                        on_on=self._on_on, 
+                                        on_off=self._on_off,
+                                        on_switch=None, 
+                                        on_tune_start=self._on_tune_start, 
+                                        on_tune_back=self._on_tune_back, 
+                                        on_tune_stop=self._on_tune_stop, 
+                                        on_load_preset=None, 
+                                        on_save_preset=None, 
+                                        on_battery_low=None)
+
+    def _on_on(self):
+        _LOGGER.debug('remote_sensor on_on')
+        self._state = 'ON'
+        self.schedule_update_ha_state()
+        time.sleep(0.2)
+        self._state = STATE_UNKNOWN
+        self.schedule_update_ha_state()
+
+    def _on_off(self):
+        _LOGGER.debug('remote_sensor on_off')
+        self._state = "OFF"
+        self.schedule_update_ha_state()
+        time.sleep(0.2)
+        self._state = STATE_UNKNOWN
+        self.schedule_update_ha_state()
+
+    def _on_tune_start(self,  direction):    
+        from NooLite_F import Direction
+        _LOGGER.debug('remote_sensor on_tune_start. direction {0}'.format(direction))
+        if direction == Direction.UP:
+            self._state = 'UP'
+        elif direction == Direction.DOWN:
+            self._state = 'DOWN'
+        self.schedule_update_ha_state()
+
+    def _on_tune_back(self):    
+        _LOGGER.debug('remote_sensor on_tune_back')    
+
+    def _on_tune_stop(self):    
+        _LOGGER.debug('remote_sensor on_tune_stop')        
+        self._state = "STOP"
+        self.schedule_update_ha_state()
+        time.sleep(0.2)
+        self._state = STATE_UNKNOWN
+        self.schedule_update_ha_state()
+
+    @property
+    def name(self):
+        return self._config.get(CONF_NAME)
+
+    @property
+    def unit_of_measurement(self):
+        return ""    
+
+    @property
+    def force_update(self):
+        return True   
