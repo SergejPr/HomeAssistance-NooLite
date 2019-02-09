@@ -1,5 +1,6 @@
 import logging
 import voluptuous as vol
+from datetime import timedelta
 
 from homeassistant.helpers import config_validation as cv
 from homeassistant.const import CONF_NAME, CONF_MODE
@@ -18,9 +19,12 @@ _LOGGER = logging.getLogger(__name__)
 
 TYPES = ['Light', 'Dimmer', 'RGBLed']
 
+SCAN_INTERVAL = timedelta(seconds=60)
+
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_TYPE, default='Light'): vol.In(TYPES),
     vol.Optional(CONF_BROADCAST, default=False): cv.boolean,
+    vol.Optional(CONF_SCAN_INTERVAL, default=SCAN_INTERVAL): cv.time_period,
     vol.Required(CONF_NAME): cv.string,
     vol.Required(CONF_CHANNEL): cv.positive_int,
     vol.Required(CONF_MODE): cv.string,
