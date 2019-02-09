@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from homeassistant.helpers import config_validation as cv
 from homeassistant.const import CONF_NAME, CONF_MODE
-from homeassistant.const import CONF_TYPE
+from homeassistant.const import CONF_TYPE, CONF_SCAN_INTERVAL
 from homeassistant.components.light import Light
 
 from custom_components.NooLite import PLATFORM_SCHEMA
