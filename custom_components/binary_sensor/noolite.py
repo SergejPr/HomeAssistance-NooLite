@@ -6,7 +6,7 @@ import voluptuous as vol
 from NooLite_F import RemoteController, MotionSensor, Direction, BatteryState
 from NooLite_F.Sensors import BinarySensor, GenericListener
 from homeassistant.components.binary_sensor import BinarySensorDevice
-from homeassistant.const import CONF_NAME, CONF_MODE, STATE_UNKNOWN, STATE_ON, STATE_OFF
+from homeassistant.const import CONF_NAME, CONF_MODE
 from homeassistant.const import CONF_TYPE
 from homeassistant.helpers import config_validation as cv
 
