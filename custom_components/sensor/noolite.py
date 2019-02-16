@@ -1,4 +1,5 @@
 import logging
+import time
 
 import voluptuous as vol
 from NooLite_F import BatteryState
@@ -187,3 +188,15 @@ class NooLiteRemoteSensor(NooLiteGenericSensor):
         time.sleep(0.2)
         self._state = STATE_UNKNOWN
         self.schedule_update_ha_state()
+
+    @property
+    def unit_of_measurement(self):
+        return ""
+
+    @property
+    def force_update(self):
+        return True
+
+    @property
+    def state(self):
+        return self._state
