@@ -141,12 +141,6 @@ class NooLiteBatterySensor(NooLiteGenericSensor, BinarySensorDevice):
         return None
 
     @property
-    def state_attributes(self):
-        attr = {
-        }
-        return attr
-
-    @property
     def is_on(self):
         return self.battery != BATTERY_LEVEL_NORMAL
 
@@ -193,12 +187,12 @@ class NooLiteBinarySensor(NooLiteGenericSensor, BinarySensorDevice):
         self._timer = None
 
     def _on_on(self):
-        self._state = STATE_ON
+        self._state = True
         self.action_detected()
         self.schedule_update_ha_state()
 
     def _on_off(self):
-        self._state = STATE_OFF
+        self._state = False
         self.action_detected()
         self.schedule_update_ha_state()
 
@@ -209,7 +203,7 @@ class NooLiteBinarySensor(NooLiteGenericSensor, BinarySensorDevice):
         self._timer.start()
 
     def _on_timer(self):
-        self._state = STATE_UNKNOWN
+        self._state = None
         self._battery = BATTERY_LEVEL_DISCHARGED
         self._timer.cancel()
         self._timer = None
@@ -223,7 +217,7 @@ class NooLiteBinarySensor(NooLiteGenericSensor, BinarySensorDevice):
         return self._device_class
 
     @property
-    def state(self):
+    def is_on(self):
         return self._state
 
 
@@ -242,9 +236,7 @@ class NooLiteRemoteSensor(NooLiteGenericSensor, BinarySensorDevice):
                                         on_load_preset=self._on_load_preset,
                                         on_save_preset=self.action_detected,
                                         on_battery_low=self.low_battery)
-        self._time = time.time()
         self._timer = None
-        self._state_on = False
 
     def _on_on(self):
         self.action_detected()
@@ -266,10 +258,10 @@ class NooLiteRemoteSensor(NooLiteGenericSensor, BinarySensorDevice):
         self.schedule_update_ha_state()
 
     def _switch_on(self):
-        self._state_on = True
+        self._state = True
 
     def _switch_off(self):
-        self._state_on = False
+        self._state = False
         self.schedule_update_ha_state()
 
     def _on_switch(self):
@@ -289,8 +281,4 @@ class NooLiteRemoteSensor(NooLiteGenericSensor, BinarySensorDevice):
 
     @property
     def is_on(self):
-        return self._state_on
-
-    @property
-    def state(self):
-        return STATE_ON if self.is_on else STATE_OFF
+        return self._state

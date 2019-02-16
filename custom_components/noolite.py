@@ -150,7 +150,7 @@ class NooLiteGenericSensor(Entity):
     def __init__(self, config, battery_timeout):
         self._name = config[CONF_NAME]
         self._channel = config[CONF_CHANNEL]
-        self._state = STATE_UNKNOWN
+        self._state = None
         self._battery = None
         self._battery_timer = None
         self._battery_timeout = battery_timeout
@@ -183,7 +183,7 @@ class NooLiteGenericSensor(Entity):
 
     def on_battery_timeout(self):
         self._battery = BATTERY_LEVEL_DISCHARGED
-        self._state = STATE_UNKNOWN
+        self._state = None
         self.schedule_update_ha_state()
 
     @property
