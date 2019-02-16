@@ -13,4 +13,4 @@ v0.1.0
 **Breaking changes:**
 * platform and type names in config now is in lowercase
 * removed unused types
-* TempHumi sensor split two separate sensors: temp and humi
+* TempHumi sensor split to two separate sensors: temp and humi
