@@ -7,7 +7,7 @@ Changelog changes:
 v0.1.0
 ------
 
-* added binary sensors for: door, garage_door, moisture, opening, window, light, motion, battery
+* added binary sensors for: door, garage_door, moisture, opening, window, light, motion, battery (in noolite remotes)
 * added battery level information
 
 **Breaking changes:**
