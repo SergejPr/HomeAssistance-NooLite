@@ -69,7 +69,7 @@ ios:
 
 zone: !include zones.yaml
 
-NooLite:
+noolite:
   port: "/dev/ttyUSB0"
 
 vacuum: !include vacuum.yaml

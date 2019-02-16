@@ -1,5 +1,5 @@
-- platform: NooLite
+- platform: noolite
   channel: 11
   name: "aquarium_switch"
   scan_interval: 60
-  mode: NooLite-F
+  mode: noolite-f

@@ -3,24 +3,30 @@ Support for NooLite.
 """
 
 import logging
+from threading import Timer
+from typing import Optional
 
 import voluptuous as vol
-from homeassistant.components.fan import (SPEED_LOW, SPEED_MEDIUM, SPEED_HIGH)
-from homeassistant.components.light import (
-    ATTR_BRIGHTNESS, ATTR_RGB_COLOR,
-    SUPPORT_BRIGHTNESS, SUPPORT_COLOR)
-from homeassistant.const import CONF_NAME, CONF_PORT, CONF_MODE
+from homeassistant.const import CONF_NAME, CONF_PORT, CONF_MODE, ATTR_BATTERY_LEVEL
 from homeassistant.const import EVENT_HOMEASSISTANT_STOP
-from homeassistant.const import STATE_OFF
 from homeassistant.const import STATE_UNKNOWN
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.entity import ToggleEntity, Entity
 
-REQUIREMENTS = ['NooLite-F==0.0.21']
+REQUIREMENTS = ['NooLite-F==0.1.0']
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = 'NooLite'
+MODE_NOOLITE = 'noolite'
+MODE_NOOLITE_F = 'noolite-f'
+
+MODES_NOOLITE = [MODE_NOOLITE, MODE_NOOLITE_F]
+
+BATTERY_LEVEL_NORMAL = 100
+BATTERY_LEVEL_LOW = 20
+BATTERY_LEVEL_DISCHARGED = 0
+
+DOMAIN = 'noolite'
 
 CONF_CHANNEL = "channel"
 CONF_BROADCAST = "broadcast"
@@ -47,9 +53,12 @@ def setup(hass, config):
     from serial import SerialException
 
     try:
-        DEVICE = MTRF64Controller(config[DOMAIN].get(CONF_PORT))
+        DEVICE = MTRF64Controller(config[DOMAIN][CONF_PORT])
     except SerialException as exc:
-        _LOGGER.exception("Unable to open serial port for NooLite: %s", exc)
+        _LOGGER.error("Unable to open serial port for NooLite: %s", exc)
+        return False
+    except KeyError as exc:
+        _LOGGER.error("Configuration for NooLite component doesn't found: %s", exc)
         return False
 
     hass.bus.listen_once(EVENT_HOMEASSISTANT_STOP, _release_noolite)
@@ -64,9 +73,9 @@ def _release_noolite(*args):
 def _module_mode(config):
     from NooLite_F import ModuleMode
 
-    mode = config.get(CONF_MODE)
+    mode = config[CONF_MODE].lower()
 
-    if mode == 'NooLite':
+    if mode == MODE_NOOLITE:
         module_mode = ModuleMode.NOOLITE
     else:
         module_mode = ModuleMode.NOOLITE_F
@@ -74,47 +83,44 @@ def _module_mode(config):
     return module_mode
 
 
-class NooLiteModule(Entity):
-    def __init__(self, hass, config):
-        self._config = config
+class NooLiteGenericModule(ToggleEntity):
+    def __init__(self, config):
+        self._name = config[CONF_NAME]
+        self._mode = _module_mode(config)
+        self._broadcast = config[CONF_BROADCAST]
+        self._channel = config[CONF_CHANNEL]
         self._state = STATE_UNKNOWN
+        self._level = 0.0
 
     @property
-    def name(self):
-        return self._config.get(CONF_NAME)
+    def name(self) -> Optional[str]:
+        return self._name
 
     @property
-    def config(self):
-        return self._config
-
-    @property
-    def is_on(self):
+    def is_on(self) -> bool:
         return self._state
 
     @property
     def assumed_state(self) -> bool:
         from NooLite_F import ModuleMode
-        return _module_mode(self._config) == ModuleMode.NOOLITE
+        return self._mode == ModuleMode.NOOLITE
 
     def turn_on(self, **kwargs):
-        responses = DEVICE.on(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST),
-                              _module_mode(self._config))
+        responses = DEVICE.on(None, self._channel, self._broadcast, self._mode)
         if self.assumed_state:
             self._state = True
         else:
             self._update_state_from(responses)
 
     def turn_off(self, **kwargs):
-        responses = DEVICE.off(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST),
-                               _module_mode(self._config))
+        responses = DEVICE.off(None, self._channel, self._broadcast, self._mode)
         if self.assumed_state:
             self._state = False
         else:
             self._update_state_from(responses)
 
     def toggle(self, **kwargs) -> None:
-        responses = DEVICE.switch(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST),
-                                  _module_mode(self._config))
+        responses = DEVICE.switch(None, self._channel, self._broadcast, self._mode)
         if self.assumed_state:
             self._state = not self._state
         else:
@@ -122,8 +128,7 @@ class NooLiteModule(Entity):
 
     def update(self):
         if not self.assumed_state:
-            responses = DEVICE.read_state(None, self._config.get(CONF_CHANNEL), self._config.get(CONF_BROADCAST),
-                                          _module_mode(self._config))
+            responses = DEVICE.read_state(None, self._channel, self._broadcast, self._mode)
             self._update_state_from(responses)
 
     def _is_module_on(self, module_state) -> bool:
@@ -131,173 +136,74 @@ class NooLiteModule(Entity):
         return module_state.state == ModuleState.ON or module_state.state == ModuleState.TEMPORARY_ON
 
     def _update_state_from(self, responses):
-
         state = False
+        level = 0.0
         for (result, info, module_state) in responses:
-            if result and module_state is not None:
-                state = state or self._is_module_on(module_state)
-
+            if result and module_state is not None and self._is_module_on(module_state):
+                state = True
+                level = max(module_state.brightness, level)
         self._state = state
+        self._level = level
 
 
-class NooLiteDimmerModule(NooLiteModule):
-    def __init__(self, hass, config):
-        super().__init__(hass, config)
-        self._brightness = 255
+class NooLiteGenericSensor(Entity):
+    def __init__(self, config, battery_timeout):
+        self._name = config[CONF_NAME]
+        self._channel = config[CONF_CHANNEL]
+        self._state = STATE_UNKNOWN
+        self._battery = None
+        self._battery_timer = None
+        self._battery_timeout = battery_timeout
 
-    @property
-    def supported_features(self) -> int:
-        return SUPPORT_BRIGHTNESS
+    def action_detected(self):
+        if self._battery_timer is None:
+            self.normal_battery()
 
-    @property
-    def brightness(self):
-        return self._brightness
+    def low_battery(self):
+        self._battery = BATTERY_LEVEL_LOW
+        self._start_battery_timer()
+        self.schedule_update_ha_state()
 
-    def _update_state_from(self, responses):
-        super()._update_state_from(responses)
-        for (result, info, module_state) in responses:
-            if result and module_state is not None and super()._is_module_on(module_state):
-                self._brightness = module_state.brightness * 255
+    def normal_battery(self):
+        if self._battery_timer is not None:
+            self._battery_timer.cancel()
+            self._battery_timer = None
+        self._battery = BATTERY_LEVEL_NORMAL
+        self.schedule_update_ha_state()
 
-    def turn_on(self, **kwargs):
-        brightness = kwargs.get(ATTR_BRIGHTNESS)
-        if brightness is None:
-            brightness = self._brightness
+    def _start_battery_timer(self):
+        if self._battery_timer is not None:
+            self._battery_timer.cancel()
+        self._battery_timer = Timer(self._battery_timeout, self._on_battery_timer)
+        self._battery_timer.start()
 
-        responses = DEVICE.set_brightness(brightness / 255, None, self._config.get(CONF_CHANNEL),
-                                          self._config.get(CONF_BROADCAST), _module_mode(self._config))
-        if self.assumed_state:
-            self._state = True
-            self._brightness = brightness
-        else:
-            self._update_state_from(responses)
+    def _on_battery_timer(self):
+        self._battery_timer = None
+        self.on_battery_timeout()
 
-
-class NooLiteFanModule(NooLiteModule):
-    def __init__(self, hass, config):
-        super().__init__(hass, config)
-        self.hass = hass
-        self._speed = STATE_OFF
-
-    @property
-    def is_on(self):
-        """Return true if device is on."""
-        return self._speed != STATE_OFF
-
-    @property
-    def should_poll(self):
-        """No polling needed for a fan."""
-        return False
-
-    @property
-    def speed(self) -> str:
-        """Return the current speed."""
-        return self._speed
-
-    @property
-    def speed_list(self) -> list:
-        """Get the list of available speeds."""
-        return [STATE_OFF, SPEED_LOW, SPEED_MEDIUM, SPEED_HIGH]
-
-    def turn_on(self, speed: str = None, **kwargs) -> None:
-        """Turn on the entity."""
-        if speed is None:
-            speed = SPEED_MEDIUM
-        self.set_speed(speed)
-
-    def turn_off(self, **kwargs) -> None:
-        """Turn off the entity."""
-        self.set_speed(STATE_OFF)
-
-    def set_speed(self, speed: str) -> None:
-        """Set the speed of the fan."""
-
-        if speed is None:
-            speed = self._speed
-        int_speed = 0
-
-        if speed == SPEED_HIGH:
-            int_speed = 255
-        elif speed == SPEED_MEDIUM:
-            int_speed = 180
-        elif speed == SPEED_LOW:
-            int_speed = 70
-
-        responses = DEVICE.set_brightness(int_speed / 255, None, self._config.get(CONF_CHANNEL),
-                                          self._config.get(CONF_BROADCAST), _module_mode(self._config))
-        if self.assumed_state:
-            self._state = True
-            self._speed = speed
-        else:
-            self._update_state_from(responses)
-
+    def on_battery_timeout(self):
+        self._battery = BATTERY_LEVEL_DISCHARGED
+        self._state = STATE_UNKNOWN
         self.schedule_update_ha_state()
 
     @property
-    def supported_features(self) -> int:
-        """Flag supported features."""
-        return 0
-
-    def _update_state_from(self, responses):
-        super()._update_state_from(responses)
-        for (result, info, module_state) in responses:
-            if result and module_state is not None and super()._is_module_on(module_state):
-
-                int_speed = int(module_state.brightness * 255)
-
-                self._speed = STATE_OFF
-
-                if 0 < int_speed <= 80:
-                    self._speed = SPEED_LOW
-
-                if 80 < int_speed <= 180:
-                    self._speed = SPEED_MEDIUM
-
-                if 180 < int_speed:
-                    self._speed = SPEED_HIGH
-
-
-class NooLiteRGBLedModule(NooLiteModule):
-    def __init__(self, hass, config):
-        super().__init__(hass, config)
-        self._brightness = 255
-        self._rgb = [255, 255, 255]
+    def battery(self):
+        return self._battery
 
     @property
-    def supported_features(self) -> int:
-        return SUPPORT_COLOR | SUPPORT_BRIGHTNESS
+    def name(self):
+        return self._name
 
     @property
-    def rgb_color(self):
-        return self._rgb
+    def should_poll(self):
+        return False
 
     @property
-    def brightness(self):
-        return self._brightness
+    def state_attributes(self):
+        attr = {
+            ATTR_BATTERY_LEVEL: self._battery
+        }
+        return attr
 
-    def _update_state_from(self, responses):
-        super()._update_state_from(responses)
-        for (result, info, module_state) in responses:
-            if result and module_state is not None and super()._is_module_on(module_state):
-                self._brightness = module_state.brightness * 255
-
-    def turn_on(self, **kwargs):
-        rgb = kwargs.get(ATTR_RGB_COLOR)
-        if rgb is not None:
-            self._rgb = rgb
-
-        brightness = kwargs.get(ATTR_BRIGHTNESS)
-        if brightness is not None:
-            self._brightness = brightness
-
-        brightness_multiplier = self._brightness / 255
-        red = (self._rgb[0] * brightness_multiplier) / 255
-        green = (self._rgb[1] * brightness_multiplier) / 255
-        blue = (self._rgb[2] * brightness_multiplier) / 255
-
-        responses = DEVICE.set_rgb_brightness(red, green, blue, None, self._config.get(CONF_CHANNEL),
-                                              self._config.get(CONF_BROADCAST), _module_mode(self._config))
-        if self.assumed_state:
-            self._state = True
-        else:
-            self._update_state_from(responses)
+    def update(self):
+        pass

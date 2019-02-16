@@ -1,53 +1,53 @@
-- platform: NooLite
+- platform: noolite
   channel: 0
   name: "living_room_light"
   scan_interval: 60
-  type: Dimmer
-  mode: NooLite-F
+  type: dimmer
+  mode: noolite-f
 
-- platform: NooLite
+- platform: noolite
   channel: 1
   name: "living_room_work_lights"
-  mode: NooLite-F
+  type: dimmer
+  mode: noolite-f
   scan_interval: 60
-  type: Dimmer
-  broadcast: True
+  broadcast: true
 
-- platform: NooLite
+- platform: noolite
   channel: 7
   name: "living_room_light_rgb"
   scan_interval: 60
-  mode: NooLite-F
+  mode: noolite-f
 
-- platform: NooLite
+- platform: noolite
   channel: 2
   name: "kitchen_light"
   scan_interval: 60
-  type: Dimmer
-  mode: NooLite-F
+  type: dimmer
+  mode: noolite-f
 
-- platform: NooLite
+- platform: noolite
   channel: 4
   name: "bathroom_light"
   scan_interval: 60
-  mode: NooLite-F
+  mode: noolite-f
 
-- platform: NooLite
+- platform: noolite
   channel: 5
   name: "wc_light"
   scan_interval: 60
-  mode: NooLite-F
+  mode: noolite-f
 
-- platform: NooLite
+- platform: noolite
   channel: 6
   name: "hall_light"
   scan_interval: 60
-  type: Dimmer
-  mode: NooLite-F
+  type: dimmer
+  mode: noolite-f
 
-- platform: NooLite
+- platform: noolite
   channel: 8
   name: "hall_extra_light"
   scan_interval: 60
-  type: Dimmer
-  mode: NooLite-F
+  type: dimmer
+  mode: noolite-f

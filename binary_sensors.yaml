@@ -1,10 +1,5 @@
-- platform: NooLite
+- platform: noolite
   channel: 10
   name: "hall_motion"
-  mode: NooLite
-  type: Motion
-- platform: NooLite
-  channel: 25
-  name: "all_off"
-  mode: NooLite
-  type: Remote
+  mode: noolite
+  type: motion

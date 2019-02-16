@@ -1,11 +1,16 @@
 # Weather prediction
 - platform: yr
 
-- platform: NooLite
+- platform: noolite
   channel: 9
-  name: "living_room_sensor"
-  mode: NooLite
-  type: TempHumi
+  name: "living_room_sensor_temperature"
+  mode: noolite
+  type: temp
 
+- platform: noolite
+  channel: 9
+  name: "living_room_sensor_humidity"
+  mode: noolite
+  type: humi
 
 
