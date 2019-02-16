@@ -14,7 +14,7 @@ DEPENDENCIES = ['NooLite']
 
 _LOGGER = logging.getLogger(__name__)
 
-TYPES = ['TempHumi', 'Temp', 'Analog']
+TYPES = ['TempHumi', 'Temp', 'Analog', 'Remote']
 
 MEASUREMENT_PERCENTS = "%"
 
@@ -41,6 +41,8 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
         devices.append(NooLiteTemperatureSensor(hass, config))
     elif module_type == 'Analog':
         devices.append(NooLiteAnalogSensor(hass, config))
+    elif module_type == 'Remote':
+        devices.append(NooLiteRemoteSensor(hass, config))
 
     add_devices(devices)
 
