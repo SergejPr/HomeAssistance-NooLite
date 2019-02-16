@@ -36,7 +36,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_TYPE, default=_TYPE_OPENING): vol.In(_TYPES),
     vol.Required(CONF_NAME): cv.string,
     vol.Required(CONF_CHANNEL): cv.positive_int,
-    vol.Required(CONF_MODE, default=MODE_NOOLITE_F): vol.In(MODES_NOOLITE),
 })
 
 _DATA_INTERVAL = 13 * 60 * 60

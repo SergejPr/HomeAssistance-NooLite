@@ -1,5 +1,4 @@
 - platform: noolite
   channel: 10
   name: "hall_motion"
-  mode: noolite
   type: motion

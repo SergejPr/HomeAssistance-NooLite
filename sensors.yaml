@@ -4,13 +4,11 @@
 - platform: noolite
   channel: 9
   name: "living_room_sensor_temperature"
-  mode: noolite
   type: temp
 
 - platform: noolite
   channel: 9
   name: "living_room_sensor_humidity"
-  mode: noolite
   type: humi
 
 
