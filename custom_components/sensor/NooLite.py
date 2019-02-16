@@ -1,4 +1,6 @@
 import logging
+import time
+
 import voluptuous as vol
 
 from homeassistant.const import CONF_NAME, CONF_MODE
