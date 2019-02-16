@@ -1,16 +1,15 @@
 import logging
-import time
 from threading import Timer
 
 import voluptuous as vol
-from NooLite_F import BatteryState
+from NooLite_F import BatteryState, RemoteController, TempHumiSensor
 from homeassistant.const import CONF_NAME, CONF_MODE, DEVICE_CLASS_TEMPERATURE, DEVICE_CLASS_HUMIDITY
 from homeassistant.const import CONF_TYPE, STATE_UNKNOWN, TEMP_CELSIUS
 from homeassistant.helpers import config_validation as cv
 
-from custom_components import noolite
-from custom_components.noolite import CONF_CHANNEL, MODES_NOOLITE, MODE_NOOLITE_F, NooLiteGenericSensor
-from custom_components.noolite import PLATFORM_SCHEMA
+from custom_components.noolite.__init__ import (CONF_CHANNEL, MODES_NOOLITE, MODE_NOOLITE_F, NooLiteGenericSensor,
+                                                DOMAIN)
+from custom_components.noolite.__init__ import (PLATFORM_SCHEMA)
 
 DEPENDENCIES = ['noolite']
 
@@ -45,22 +44,21 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
     devices = []
     if module_type == _TYPE_HUMI:
-        devices.append(NooLiteHumiditySensor(config))
+        devices.append(NooLiteHumiditySensor(config, hass.data[DOMAIN]))
     elif module_type == _TYPE_TEMP:
-        devices.append(NooLiteTemperatureSensor(config))
+        devices.append(NooLiteTemperatureSensor(config, hass.data[DOMAIN]))
     elif module_type == _TYPE_ANALOG:
-        devices.append(NooLiteAnalogSensor(config))
+        devices.append(NooLiteAnalogSensor(config, hass.data[DOMAIN]))
     elif module_type == _TYPE_REMOTE:
-        devices.append(NooLiteRemoteSensor(config))
+        devices.append(NooLiteRemoteSensor(config, hass.data[DOMAIN]))
 
     add_devices(devices)
 
 
 class NooLiteTemperatureSensor(NooLiteGenericSensor):
-    def __init__(self, config):
-        super().__init__(config, _DATA_INTERVAL)
-        from NooLite_F import TempHumiSensor
-        self._sensor = TempHumiSensor(noolite.DEVICE, self._channel, self._on_data)
+    def __init__(self, config, device):
+        super().__init__(config, device, _DATA_INTERVAL)
+        self._sensor = TempHumiSensor(device, self._channel, self._on_data)
 
     def _on_data(self, temp, humi, analog, battery):
         if battery == BatteryState.OK:
@@ -84,10 +82,9 @@ class NooLiteTemperatureSensor(NooLiteGenericSensor):
 
 
 class NooLiteHumiditySensor(NooLiteGenericSensor):
-    def __init__(self, config):
-        super().__init__(config, _DATA_INTERVAL)
-        from NooLite_F import TempHumiSensor
-        self._sensor = TempHumiSensor(noolite.DEVICE, self._channel, self._on_data)
+    def __init__(self, config, device):
+        super().__init__(config, device, _DATA_INTERVAL)
+        self._sensor = TempHumiSensor(device, self._channel, self._on_data)
 
     def _on_data(self, temp, humi, analog, battery):
         if battery == BatteryState.OK:
@@ -111,10 +108,9 @@ class NooLiteHumiditySensor(NooLiteGenericSensor):
 
 
 class NooLiteAnalogSensor(NooLiteGenericSensor):
-    def __init__(self, config):
-        super().__init__(config, _DATA_INTERVAL)
-        from NooLite_F import TempHumiSensor
-        self._sensor = TempHumiSensor(noolite.DEVICE, self._channel, self._on_data)
+    def __init__(self, config, device):
+        super().__init__(config, device, _DATA_INTERVAL)
+        self._sensor = TempHumiSensor(device, self._channel, self._on_data)
 
     def _on_data(self, temp, humi, analog, battery):
         if battery == BatteryState.OK:
@@ -134,12 +130,10 @@ class NooLiteAnalogSensor(NooLiteGenericSensor):
 
 
 class NooLiteRemoteSensor(NooLiteGenericSensor):
-    def __init__(self, config):
-        super().__init__(config, _BATTERY_DATA_INTERVAL)
-        from NooLite_F import RemoteController
-        self._config = config
-        self._sensor = RemoteController(controller=noolite.DEVICE,
-                                        channel=config.get(CONF_CHANNEL),
+    def __init__(self, config, device):
+        super().__init__(config, device, _BATTERY_DATA_INTERVAL)
+        self._sensor = RemoteController(controller=device,
+                                        channel=self._channel,
                                         on_on=self._on_on,
                                         on_off=self._on_off,
                                         on_switch=self.action_detected,

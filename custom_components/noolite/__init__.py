@@ -33,7 +33,6 @@ CONF_BROADCAST = "broadcast"
 
 DEFAULT_PORT = '/dev/ttyUSB0'
 
-DEVICE = None
 
 CONFIG_SCHEMA = vol.Schema({
     DOMAIN: vol.Schema({
@@ -47,13 +46,12 @@ PLATFORM_SCHEMA = vol.Schema({
 
 def setup(hass, config):
     """Set up the connection to the NooLite device."""
-    global DEVICE
 
     from NooLite_F.MTRF64 import MTRF64Controller
     from serial import SerialException
 
     try:
-        DEVICE = MTRF64Controller(config[DOMAIN][CONF_PORT])
+        hass.data[DOMAIN] = MTRF64Controller(config[DOMAIN][CONF_PORT])
     except SerialException as exc:
         _LOGGER.error("Unable to open serial port for NooLite: %s", exc)
         return False
@@ -61,13 +59,12 @@ def setup(hass, config):
         _LOGGER.error("Configuration for NooLite component doesn't found: %s", exc)
         return False
 
+    def _release_noolite():
+        hass.data[DOMAIN].release()
+
     hass.bus.listen_once(EVENT_HOMEASSISTANT_STOP, _release_noolite)
 
     return True
-
-
-def _release_noolite(*args):
-    DEVICE.release()
 
 
 def _module_mode(config):
@@ -84,7 +81,8 @@ def _module_mode(config):
 
 
 class NooLiteGenericModule(ToggleEntity):
-    def __init__(self, config):
+    def __init__(self, config, device):
+        self._device = device
         self._name = config[CONF_NAME]
         self._mode = _module_mode(config)
         self._broadcast = config[CONF_BROADCAST]
@@ -106,21 +104,21 @@ class NooLiteGenericModule(ToggleEntity):
         return self._mode == ModuleMode.NOOLITE
 
     def turn_on(self, **kwargs):
-        responses = DEVICE.on(None, self._channel, self._broadcast, self._mode)
+        responses = self._device.on(None, self._channel, self._broadcast, self._mode)
         if self.assumed_state:
             self._state = True
         else:
             self._update_state_from(responses)
 
     def turn_off(self, **kwargs):
-        responses = DEVICE.off(None, self._channel, self._broadcast, self._mode)
+        responses = self._device.off(None, self._channel, self._broadcast, self._mode)
         if self.assumed_state:
             self._state = False
         else:
             self._update_state_from(responses)
 
     def toggle(self, **kwargs) -> None:
-        responses = DEVICE.switch(None, self._channel, self._broadcast, self._mode)
+        responses = self._device.switch(None, self._channel, self._broadcast, self._mode)
         if self.assumed_state:
             self._state = not self._state
         else:
@@ -128,7 +126,7 @@ class NooLiteGenericModule(ToggleEntity):
 
     def update(self):
         if not self.assumed_state:
-            responses = DEVICE.read_state(None, self._channel, self._broadcast, self._mode)
+            responses = self._device.read_state(None, self._channel, self._broadcast, self._mode)
             self._update_state_from(responses)
 
     def _is_module_on(self, module_state) -> bool:
@@ -147,7 +145,8 @@ class NooLiteGenericModule(ToggleEntity):
 
 
 class NooLiteGenericSensor(Entity):
-    def __init__(self, config, battery_timeout):
+    def __init__(self, config, device, battery_timeout):
+        self._device = device
         self._name = config[CONF_NAME]
         self._channel = config[CONF_CHANNEL]
         self._state = None

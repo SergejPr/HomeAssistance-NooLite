@@ -7,10 +7,9 @@ from homeassistant.const import CONF_NAME, CONF_MODE
 from homeassistant.const import CONF_TYPE, CONF_SCAN_INTERVAL
 from homeassistant.helpers import config_validation as cv
 
-from custom_components import noolite
-from custom_components.noolite import CONF_BROADCAST, CONF_CHANNEL, MODES_NOOLITE, MODE_NOOLITE_F
-from custom_components.noolite import NooLiteGenericModule
-from custom_components.noolite import PLATFORM_SCHEMA
+from custom_components.noolite import (CONF_BROADCAST, CONF_CHANNEL, MODES_NOOLITE, MODE_NOOLITE_F, DOMAIN)
+from custom_components.noolite import (NooLiteGenericModule)
+from custom_components.noolite import (PLATFORM_SCHEMA)
 
 DEPENDENCIES = ['noolite']
 
@@ -42,11 +41,11 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
     devices = []
     if module_type == _TYPE_LIGHT:
-        devices.append(NooLiteSwitch(config))
+        devices.append(NooLiteSwitch(config, hass.data[DOMAIN]))
     elif module_type == _TYPE_DIMMER:
-        devices.append(NooLiteDimmerSwitch(config))
+        devices.append(NooLiteDimmerSwitch(config, hass.data[DOMAIN]))
     elif module_type == _TYPE_RGB_LED:
-        devices.append(NooLiteRGBLedSwitch(config))
+        devices.append(NooLiteRGBLedSwitch(config, hass.data[DOMAIN]))
 
     add_devices(devices)
 
@@ -56,8 +55,8 @@ class NooLiteSwitch(NooLiteGenericModule, Light):
 
 
 class NooLiteDimmerSwitch(NooLiteSwitch):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, config, device):
+        super().__init__(config, device)
         self._brightness = 255
 
     @property
@@ -78,7 +77,7 @@ class NooLiteDimmerSwitch(NooLiteSwitch):
         if brightness is None:
             brightness = self._brightness
 
-        responses = noolite.DEVICE.set_brightness(brightness / 255, None, self._channel, self._broadcast, self._mode)
+        responses = self._device.set_brightness(brightness / 255, None, self._channel, self._broadcast, self._mode)
         if self.assumed_state:
             self._state = True
             self._brightness = brightness
@@ -87,8 +86,8 @@ class NooLiteDimmerSwitch(NooLiteSwitch):
 
 
 class NooLiteRGBLedSwitch(NooLiteDimmerSwitch):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, config, device):
+        super().__init__(config, device)
         self._rgb = [255, 255, 255]
 
     @property
@@ -113,8 +112,7 @@ class NooLiteRGBLedSwitch(NooLiteDimmerSwitch):
         green = (self._rgb[1] * brightness_multiplier) / 255
         blue = (self._rgb[2] * brightness_multiplier) / 255
 
-        responses = noolite.DEVICE.set_rgb_brightness(red, green, blue, None, self._channel, self._broadcast,
-                                                      self._mode)
+        responses = self._device.set_rgb_brightness(red, green, blue, None, self._channel, self._broadcast, self._mode)
         if self.assumed_state:
             self._state = True
             self._brightness = brightness

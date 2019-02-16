@@ -7,9 +7,9 @@ from homeassistant.components.fan import (FanEntity, SUPPORT_SET_SPEED, SUPPORT_
 from homeassistant.const import CONF_NAME, CONF_MODE, CONF_SCAN_INTERVAL
 from homeassistant.helpers import config_validation as cv
 
-from custom_components import noolite
-from custom_components.noolite import CONF_BROADCAST, CONF_CHANNEL, MODES_NOOLITE, MODE_NOOLITE_F, NooLiteGenericModule
-from custom_components.noolite import PLATFORM_SCHEMA
+from custom_components.noolite import (CONF_BROADCAST, CONF_CHANNEL, MODES_NOOLITE, MODE_NOOLITE_F,
+                                       NooLiteGenericModule, DOMAIN)
+from custom_components.noolite import (PLATFORM_SCHEMA)
 
 FULL_SUPPORT = SUPPORT_SET_SPEED | SUPPORT_OSCILLATE | SUPPORT_DIRECTION
 LIMITED_SUPPORT = SUPPORT_SET_SPEED
@@ -31,13 +31,13 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     _LOGGER.info(config)
-    add_devices([NooLiteFan(config)])
+    add_devices([NooLiteFan(config, hass.data[DOMAIN])])
 
 
 class NooLiteFan(NooLiteGenericModule, FanEntity):
 
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, config, device):
+        super().__init__(config, device)
         self._speed = SPEED_OFF
 
     @property
@@ -85,7 +85,7 @@ class NooLiteFan(NooLiteGenericModule, FanEntity):
         else:
             int_speed = 0
 
-        responses = noolite.DEVICE.set_brightness(int_speed / 255, None, self._channel, self._broadcast, self._mode)
+        responses = self._device.set_brightness(int_speed / 255, None, self._channel, self._broadcast, self._mode)
         if self.assumed_state:
             self._state = speed != SPEED_OFF
             self._speed = speed

@@ -7,9 +7,9 @@ from homeassistant.const import CONF_NAME, CONF_MODE
 from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.helpers import config_validation as cv
 
-from custom_components.noolite import CONF_BROADCAST, CONF_CHANNEL, MODES_NOOLITE, MODE_NOOLITE_F
-from custom_components.noolite import NooLiteGenericModule
-from custom_components.noolite import PLATFORM_SCHEMA
+from custom_components.noolite import (CONF_BROADCAST, CONF_CHANNEL, MODES_NOOLITE, MODE_NOOLITE_F, DOMAIN)
+from custom_components.noolite import (NooLiteGenericModule)
+from custom_components.noolite import (PLATFORM_SCHEMA)
 
 DEPENDENCIES = ['noolite']
 
@@ -29,7 +29,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Setup the NooLite platform."""
     _LOGGER.info(config)
-    add_devices([NooLiteSwitchDevice(config)])
+    add_devices([NooLiteSwitchDevice(config, hass.data[DOMAIN])])
 
 
 class NooLiteSwitchDevice(NooLiteGenericModule, SwitchDevice):

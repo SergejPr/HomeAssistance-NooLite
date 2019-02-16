@@ -10,10 +10,10 @@ from homeassistant.const import CONF_NAME, CONF_MODE
 from homeassistant.const import CONF_TYPE
 from homeassistant.helpers import config_validation as cv
 
-from custom_components import noolite
-from custom_components.noolite import CONF_CHANNEL, MODES_NOOLITE, MODE_NOOLITE_F, BATTERY_LEVEL_DISCHARGED, \
-    BATTERY_LEVEL_NORMAL, NooLiteGenericSensor
-from custom_components.noolite import PLATFORM_SCHEMA
+
+from custom_components.noolite import (CONF_CHANNEL, MODES_NOOLITE, MODE_NOOLITE_F, BATTERY_LEVEL_DISCHARGED,
+                                       BATTERY_LEVEL_NORMAL, NooLiteGenericSensor, DOMAIN)
+from custom_components.noolite import (PLATFORM_SCHEMA)
 
 DEPENDENCIES = ['noolite']
 
@@ -51,13 +51,13 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
     devices = []
     if module_type == _TYPE_MOTION:
-        devices.append(NooLiteMotionSensor(config))
+        devices.append(NooLiteMotionSensor(config, hass.data[DOMAIN]))
     elif module_type == _TYPE_BATTERY:
-        devices.append(NooLiteBatterySensor(config))
+        devices.append(NooLiteBatterySensor(config, hass.data[DOMAIN]))
     elif module_type == _TYPE_REMOTE:
-        devices.append(NooLiteRemoteSensor(config))
+        devices.append(NooLiteRemoteSensor(config, hass.data[DOMAIN]))
     else:
-        devices.append(NooLiteBinarySensor(config))
+        devices.append(NooLiteBinarySensor(config, hass.data[DOMAIN]))
 
     add_devices(devices)
 
@@ -127,9 +127,9 @@ class NooLiteBatterySensor(NooLiteGenericSensor, BinarySensorDevice):
             else:
                 self._on_battery_low()
 
-    def __init__(self, config):
-        super().__init__(config, _BATTERY_DATA_INTERVAL)
-        self._sensor = self.Receiver(noolite.DEVICE, self._channel, self.action_detected, self.low_battery,
+    def __init__(self, config, device):
+        super().__init__(config, device, _BATTERY_DATA_INTERVAL)
+        self._sensor = self.Receiver(device, self._channel, self.action_detected, self.low_battery,
                                      self.normal_battery)
 
     @property
@@ -146,9 +146,9 @@ class NooLiteBatterySensor(NooLiteGenericSensor, BinarySensorDevice):
 
 
 class NooLiteMotionSensor(NooLiteGenericSensor, BinarySensorDevice):
-    def __init__(self, config):
-        super().__init__(config, _BATTERY_DATA_INTERVAL)
-        self._sensor = MotionSensor(noolite.DEVICE, self._channel, self._on_motion, self.low_battery)
+    def __init__(self, config, device):
+        super().__init__(config, device, _BATTERY_DATA_INTERVAL)
+        self._sensor = MotionSensor(device, self._channel, self._on_motion, self.low_battery)
         self._time = time.time()
         self._timer = None
 
@@ -183,10 +183,10 @@ class NooLiteMotionSensor(NooLiteGenericSensor, BinarySensorDevice):
 
 
 class NooLiteBinarySensor(NooLiteGenericSensor, BinarySensorDevice):
-    def __init__(self, config):
-        super().__init__(config, _BATTERY_DATA_INTERVAL)
+    def __init__(self, config, device):
+        super().__init__(config, device, _BATTERY_DATA_INTERVAL)
         self._device_class = config[CONF_TYPE]
-        self._sensor = BinarySensor(noolite.DEVICE, self._channel, self._on_on, self._on_off, self.low_battery)
+        self._sensor = BinarySensor(device, self._channel, self._on_on, self._on_off, self.low_battery)
         self._timer = None
 
     def _on_on(self):
@@ -229,9 +229,9 @@ class NooLiteBinarySensor(NooLiteGenericSensor, BinarySensorDevice):
 
 class NooLiteRemoteSensor(NooLiteGenericSensor, BinarySensorDevice):
 
-    def __init__(self, config):
-        super().__init__(config, _BATTERY_DATA_INTERVAL)
-        self._sensor = RemoteController(controller=noolite.DEVICE,
+    def __init__(self, config, device):
+        super().__init__(config, device, _BATTERY_DATA_INTERVAL)
+        self._sensor = RemoteController(controller=device,
                                         channel=self._channel,
                                         on_on=self._on_on,
                                         on_off=self._on_off,
