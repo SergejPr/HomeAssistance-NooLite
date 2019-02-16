@@ -10,9 +10,9 @@ from homeassistant.const import CONF_NAME, CONF_MODE
 from homeassistant.components.binary_sensor import BinarySensorDevice
 from homeassistant.helpers import config_validation as cv
 
-from custom_components import NooLite
-from custom_components.NooLite import PLATFORM_SCHEMA
-from custom_components.NooLite import CONF_CHANNEL
+from custom_components import noolite
+from custom_components.noolite import PLATFORM_SCHEMA
+from custom_components.noolite import CONF_CHANNEL
 
 
 DEPENDENCIES = ['NooLite']
@@ -49,7 +49,7 @@ class NooLiteMotionSensor(BinarySensorDevice):
     def __init__(self, config):
         from NooLite_F import MotionSensor
         self._config = config
-        self._sensor = MotionSensor(NooLite.DEVICE, config.get(CONF_CHANNEL), self._on_motion)
+        self._sensor = MotionSensor(noolite.DEVICE, config.get(CONF_CHANNEL), self._on_motion)
         self._time = time.time()
         self._timer = None
 
@@ -96,7 +96,7 @@ class NooLiteBinarySensor(BinarySensorDevice):
         from NooLite_F import RemoteController
         self._config = config
         self._sensor_type = device_class
-        self._sensor = RemoteController(NooLite.DEVICE, config.get(CONF_CHANNEL), self._on_on, self._on_off,
+        self._sensor = RemoteController(noolite.DEVICE, config.get(CONF_CHANNEL), self._on_on, self._on_off,
                                         self._on_switch, None, None, None, self._on_load_preset, None, None)
         self._time = time.time()
         self._timer = None

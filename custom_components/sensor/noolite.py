@@ -6,9 +6,9 @@ from homeassistant.const import CONF_TYPE, STATE_UNKNOWN, TEMP_CELSIUS
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.entity import Entity
 
-from custom_components import NooLite
-from custom_components.NooLite import PLATFORM_SCHEMA
-from custom_components.NooLite import CONF_CHANNEL
+from custom_components import noolite
+from custom_components.noolite import PLATFORM_SCHEMA
+from custom_components.noolite import CONF_CHANNEL
 
 DEPENDENCIES = ['NooLite']
 
@@ -77,7 +77,7 @@ class NooLiteTemperatureSensor(NooLiteSensor):
     def __init__(self, hass, config):
         super().__init__(hass, config)
         from NooLite_F import TempHumiSensor
-        self._sensor = TempHumiSensor(NooLite.DEVICE, config.get(CONF_CHANNEL), self._on_data)
+        self._sensor = TempHumiSensor(noolite.DEVICE, config.get(CONF_CHANNEL), self._on_data)
 
     def _on_data(self, temp, humi, battery, analog):
         self._state = temp
@@ -101,7 +101,7 @@ class NooLiteHumiditySensor(NooLiteSensor):
     def __init__(self, hass, config):
         super().__init__(hass, config)
         from NooLite_F import TempHumiSensor
-        self._sensor = TempHumiSensor(NooLite.DEVICE, config.get(CONF_CHANNEL), self._on_data)
+        self._sensor = TempHumiSensor(noolite.DEVICE, config.get(CONF_CHANNEL), self._on_data)
 
     def _on_data(self, temp, humi, battery, analog):
         self._state = humi
@@ -124,7 +124,7 @@ class NooLiteAnalogSensor(NooLiteSensor):
     def __init__(self, hass, config):
         super().__init__(hass, config)
         from NooLite_F import TempHumiSensor
-        self._sensor = TempHumiSensor(NooLite.DEVICE, config.get(CONF_CHANNEL), self._on_data)
+        self._sensor = TempHumiSensor(noolite.DEVICE, config.get(CONF_CHANNEL), self._on_data)
 
     def _on_data(self, temp, humi, battery, analog):
         self._state = analog
@@ -144,16 +144,16 @@ class NooLiteRemoteSensor(NooLiteSensor):
         super().__init__(hass, config)
         from NooLite_F import RemoteController
         self._config = config
-        self._sensor = RemoteController(controller=NooLite.DEVICE, 
-                                        channel=config.get(CONF_CHANNEL), 
-                                        on_on=self._on_on, 
+        self._sensor = RemoteController(controller=noolite.DEVICE,
+                                        channel=config.get(CONF_CHANNEL),
+                                        on_on=self._on_on,
                                         on_off=self._on_off,
-                                        on_switch=None, 
-                                        on_tune_start=self._on_tune_start, 
-                                        on_tune_back=self._on_tune_back, 
-                                        on_tune_stop=self._on_tune_stop, 
-                                        on_load_preset=None, 
-                                        on_save_preset=None, 
+                                        on_switch=None,
+                                        on_tune_start=self._on_tune_start,
+                                        on_tune_back=self._on_tune_back,
+                                        on_tune_stop=self._on_tune_stop,
+                                        on_load_preset=None,
+                                        on_save_preset=None,
                                         on_battery_low=None)
 
     def _on_on(self):

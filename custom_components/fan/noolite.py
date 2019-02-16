@@ -14,9 +14,9 @@ from homeassistant.const import CONF_NAME, CONF_MODE
 from homeassistant.const import CONF_TYPE, CONF_SCAN_INTERVAL
 from homeassistant.helpers import config_validation as cv
 
-from custom_components.NooLite import CONF_BROADCAST, CONF_CHANNEL
-from custom_components.NooLite import NooLiteFanModule
-from custom_components.NooLite import PLATFORM_SCHEMA
+from custom_components.noolite import CONF_BROADCAST, CONF_CHANNEL
+from custom_components.noolite import NooLiteFanModule
+from custom_components.noolite import PLATFORM_SCHEMA
 
 FULL_SUPPORT = SUPPORT_SET_SPEED | SUPPORT_OSCILLATE | SUPPORT_DIRECTION
 LIMITED_SUPPORT = SUPPORT_SET_SPEED
