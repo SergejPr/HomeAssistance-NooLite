@@ -1,5 +1,6 @@
 import logging
 import time
+from threading import Timer
 
 import voluptuous as vol
 from NooLite_F import BatteryState
@@ -148,24 +149,36 @@ class NooLiteRemoteSensor(NooLiteGenericSensor):
                                         on_load_preset=self.action_detected,
                                         on_save_preset=self.action_detected,
                                         on_battery_low=self.low_battery)
+        self._timer = None
+
+    def _start_timer(self):
+        self._cancel_timer()
+        self._timer = Timer(0.2, self._reset_state)
+        self._timer.start()
+
+    def _cancel_timer(self):
+        if self._timer is not None:
+            self._timer.cancel()
+        self.timer = None
+
+    def _reset_state(self):
+        self._cancel_timer()
+        self._state = STATE_UNKNOWN
+        self.schedule_update_ha_state()
 
     def _on_on(self):
         _LOGGER.debug('remote_sensor on_on')
         self.action_detected()
         self._state = 'ON'
         self.schedule_update_ha_state()
-        time.sleep(0.2)
-        self._state = STATE_UNKNOWN
-        self.schedule_update_ha_state()
+        self._start_timer()
 
     def _on_off(self):
         _LOGGER.debug('remote_sensor on_off')
         self.action_detected()
         self._state = "OFF"
         self.schedule_update_ha_state()
-        time.sleep(0.2)
-        self._state = STATE_UNKNOWN
-        self.schedule_update_ha_state()
+        self._start_timer()
 
     def _on_tune_start(self, direction):
         from NooLite_F import Direction
@@ -179,15 +192,14 @@ class NooLiteRemoteSensor(NooLiteGenericSensor):
 
     def _on_tune_back(self):
         _LOGGER.debug('remote_sensor on_tune_back')
+        self.action_detected()
 
     def _on_tune_stop(self):
         _LOGGER.debug('remote_sensor on_tune_stop')
         self.action_detected()
         self._state = "STOP"
         self.schedule_update_ha_state()
-        time.sleep(0.2)
-        self._state = STATE_UNKNOWN
-        self.schedule_update_ha_state()
+        self._start_timer()
 
     @property
     def unit_of_measurement(self):

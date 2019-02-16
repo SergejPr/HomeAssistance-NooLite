@@ -159,14 +159,17 @@ class NooLiteMotionSensor(NooLiteGenericSensor, BinarySensorDevice):
         self.schedule_update_ha_state()
 
     def _start_timer(self, duration):
-        if self._timer is not None:
-            self._timer.cancel()
+        self._cancel_timer()
         self._timer = Timer(duration, self._reset_motion)
         self._timer.start()
 
+    def _cancel_timer(self):
+        if self._timer is not None:
+            self._timer.cancel()
+        self.timer = None
+
     def _reset_motion(self):
-        self._timer.cancel()
-        self._timer = None
+        self._cancel_timer()
         self._time = time.time()
         self.schedule_update_ha_state()
 
@@ -197,16 +200,19 @@ class NooLiteBinarySensor(NooLiteGenericSensor, BinarySensorDevice):
         self.schedule_update_ha_state()
 
     def _start_timer(self):
-        if self._timer is not None:
-            self._timer.cancel()
+        self._cancel_timer()
         self._timer = Timer(_DATA_INTERVAL, self._on_timer)
         self._timer.start()
 
+    def _cancel_timer(self):
+        if self._timer is not None:
+            self._timer.cancel()
+        self.timer = None
+
     def _on_timer(self):
+        self._cancel_timer()
         self._state = None
         self._battery = BATTERY_LEVEL_DISCHARGED
-        self._timer.cancel()
-        self._timer = None
         self.schedule_update_ha_state()
 
     def on_battery_timeout(self):
@@ -238,22 +244,27 @@ class NooLiteRemoteSensor(NooLiteGenericSensor, BinarySensorDevice):
                                         on_battery_low=self.low_battery)
         self._timer = None
 
+    def _start_timer(self):
+        self._cancel_timer()
+        self._timer = Timer(0.2, self._switch_off)
+        self._timer.start()
+
+    def _cancel_timer(self):
+        if self._timer is not None:
+            self._timer.cancel()
+        self.timer = None
+
     def _on_on(self):
         self.action_detected()
         self._switch_on()
         self.schedule_update_ha_state()
 
-        if self._timer is not None:
-            self._timer.cancel()
         """keep active state for 200ms"""
-        self._timer = Timer(0.2, self._switch_off)
-        self._timer.start()
+        self._start_timer()
 
     def _on_off(self):
         self.action_detected()
-        if self._timer is not None:
-            self._timer.cancel()
-        self._timer = None
+        self._cancel_timer()
         self._switch_off()
         self.schedule_update_ha_state()
 
@@ -266,9 +277,7 @@ class NooLiteRemoteSensor(NooLiteGenericSensor, BinarySensorDevice):
 
     def _on_switch(self):
         self.action_detected()
-        if self._timer is not None:
-            self._timer.cancel()
-        self._timer = None
+        self._cancel_timer()
         self._switch_on() if not self.is_on else self._switch_off()
         self.schedule_update_ha_state()
 
