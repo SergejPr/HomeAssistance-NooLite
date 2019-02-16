@@ -6,12 +6,11 @@ import voluptuous as vol
 from NooLite_F import RemoteController, MotionSensor, Direction, BatteryState
 from NooLite_F.Sensors import BinarySensor, GenericListener
 from homeassistant.components.binary_sensor import BinarySensorDevice
-from homeassistant.const import CONF_NAME, CONF_MODE
+from homeassistant.const import CONF_NAME
 from homeassistant.const import CONF_TYPE
 from homeassistant.helpers import config_validation as cv
 
-
-from custom_components.noolite import (CONF_CHANNEL, MODES_NOOLITE, MODE_NOOLITE_F, BATTERY_LEVEL_DISCHARGED,
+from custom_components.noolite import (CONF_CHANNEL, BATTERY_LEVEL_DISCHARGED,
                                        BATTERY_LEVEL_NORMAL, NooLiteGenericSensor, DOMAIN)
 from custom_components.noolite import (PLATFORM_SCHEMA)
 
@@ -285,7 +284,7 @@ class NooLiteRemoteSensor(NooLiteGenericSensor, BinarySensorDevice):
 
     @property
     def device_class(self):
-        return "remote"
+        return "remote.py"
 
     @property
     def is_on(self):

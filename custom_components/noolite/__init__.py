@@ -33,7 +33,6 @@ CONF_BROADCAST = "broadcast"
 
 DEFAULT_PORT = '/dev/ttyUSB0'
 
-
 CONFIG_SCHEMA = vol.Schema({
     DOMAIN: vol.Schema({
         vol.Optional(CONF_PORT, default=DEFAULT_PORT): cv.string,

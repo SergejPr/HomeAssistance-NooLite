@@ -3,13 +3,12 @@ from threading import Timer
 
 import voluptuous as vol
 from NooLite_F import BatteryState, RemoteController, TempHumiSensor
-from homeassistant.const import CONF_NAME, CONF_MODE, DEVICE_CLASS_TEMPERATURE, DEVICE_CLASS_HUMIDITY
+from homeassistant.const import CONF_NAME, DEVICE_CLASS_TEMPERATURE, DEVICE_CLASS_HUMIDITY
 from homeassistant.const import CONF_TYPE, STATE_UNKNOWN, TEMP_CELSIUS
 from homeassistant.helpers import config_validation as cv
 
-from custom_components.noolite.__init__ import (CONF_CHANNEL, MODES_NOOLITE, MODE_NOOLITE_F, NooLiteGenericSensor,
-                                                DOMAIN)
-from custom_components.noolite.__init__ import (PLATFORM_SCHEMA)
+from custom_components.noolite import (CONF_CHANNEL, NooLiteGenericSensor, DOMAIN)
+from custom_components.noolite import (PLATFORM_SCHEMA)
 
 DEPENDENCIES = ['noolite']
 
