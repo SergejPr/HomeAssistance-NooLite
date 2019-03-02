@@ -13,7 +13,7 @@ from homeassistant.const import STATE_UNKNOWN
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.entity import ToggleEntity, Entity
 
-REQUIREMENTS = ['NooLite-F==0.1.1']
+REQUIREMENTS = ['NooLite-F==0.1.2']
 
 _LOGGER = logging.getLogger(__name__)
 
