@@ -1,6 +1,8 @@
 # HomeAssistance-NooLite
 NooLite platform for Home Assistance 
 
+**Note:** version 0.1.+ supported only in HA 8.16.0 and above. It is related to changing of the custom component architecture.
+
 Changelog:
 ==========
 
@@ -11,6 +13,7 @@ v0.1.0
 * added battery level information
 
 **Breaking changes:**
+
 * platform and type names in config now is in lowercase
 * removed unused types
 * TempHumi sensor split to two separate sensors: temp and humi
