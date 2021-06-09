@@ -6,6 +6,23 @@ NooLite platform for Home Assistance
 Changelog:
 ==========
 
+v0.1.2
+------
+
+* added manifest.json to match new HomeAssistant requirements
+* avoid of using deprecated Light, SwitchDevice and BinarySensorDevice
+
+**Breaking changes:**
+
+* can be don't working with version oldest then 0.108.0
+
+
+v0.1.1
+------
+
+* switch to NooLite-F v0.1.2
+
+
 v0.1.0
 ------
 
