@@ -2,7 +2,7 @@ import logging
 from datetime import timedelta
 
 import voluptuous as vol
-from homeassistant.components.switch import SwitchDevice
+from homeassistant.components.switch import SwitchEntity
 from homeassistant.const import CONF_NAME, CONF_MODE
 from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.helpers import config_validation as cv
@@ -32,5 +32,5 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     add_devices([NooLiteSwitchDevice(config, hass.data[DOMAIN])])
 
 
-class NooLiteSwitchDevice(NooLiteGenericModule, SwitchDevice):
+class NooLiteSwitchDevice(NooLiteGenericModule, SwitchEntity):
     pass

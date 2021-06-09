@@ -2,7 +2,7 @@ import logging
 from datetime import timedelta
 
 import voluptuous as vol
-from homeassistant.components.light import Light, SUPPORT_BRIGHTNESS, ATTR_BRIGHTNESS, SUPPORT_COLOR, ATTR_RGB_COLOR
+from homeassistant.components.light import LightEntity, SUPPORT_BRIGHTNESS, ATTR_BRIGHTNESS, SUPPORT_COLOR, ATTR_RGB_COLOR
 from homeassistant.const import CONF_NAME, CONF_MODE
 from homeassistant.const import CONF_TYPE, CONF_SCAN_INTERVAL
 from homeassistant.helpers import config_validation as cv
@@ -50,7 +50,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     add_devices(devices)
 
 
-class NooLiteSwitch(NooLiteGenericModule, Light):
+class NooLiteSwitch(NooLiteGenericModule, LightEntity):
     pass
 
 

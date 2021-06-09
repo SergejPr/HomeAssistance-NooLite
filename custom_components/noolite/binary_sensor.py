@@ -5,7 +5,7 @@ from threading import Timer
 import voluptuous as vol
 from NooLite_F import RemoteController, MotionSensor, Direction, BatteryState
 from NooLite_F.Sensors import BinarySensor, GenericListener
-from homeassistant.components.binary_sensor import BinarySensorDevice
+from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.const import CONF_NAME
 from homeassistant.const import CONF_TYPE
 from homeassistant.helpers import config_validation as cv
@@ -60,7 +60,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     add_devices(devices)
 
 
-class NooLiteBatterySensor(NooLiteGenericSensor, BinarySensorDevice):
+class NooLiteBatterySensor(NooLiteGenericSensor, BinarySensorEntity):
     class Receiver(GenericListener):
         def __init__(self, controller, channel, on_action, on_battery_low, on_battery_normal):
             super().__init__(controller, channel, on_battery_low)
@@ -143,7 +143,7 @@ class NooLiteBatterySensor(NooLiteGenericSensor, BinarySensorDevice):
         return self.battery != BATTERY_LEVEL_NORMAL
 
 
-class NooLiteMotionSensor(NooLiteGenericSensor, BinarySensorDevice):
+class NooLiteMotionSensor(NooLiteGenericSensor, BinarySensorEntity):
     def __init__(self, config, device):
         super().__init__(config, device, _BATTERY_DATA_INTERVAL)
         self._sensor = MotionSensor(device, self._channel, self._on_motion, self.low_battery)
@@ -180,7 +180,7 @@ class NooLiteMotionSensor(NooLiteGenericSensor, BinarySensorDevice):
         return time.time() < self._time
 
 
-class NooLiteBinarySensor(NooLiteGenericSensor, BinarySensorDevice):
+class NooLiteBinarySensor(NooLiteGenericSensor, BinarySensorEntity):
     def __init__(self, config, device):
         super().__init__(config, device, _BATTERY_DATA_INTERVAL)
         self._device_class = config[CONF_TYPE]
@@ -225,7 +225,7 @@ class NooLiteBinarySensor(NooLiteGenericSensor, BinarySensorDevice):
         return self._state
 
 
-class NooLiteRemoteSensor(NooLiteGenericSensor, BinarySensorDevice):
+class NooLiteRemoteSensor(NooLiteGenericSensor, BinarySensorEntity):
 
     def __init__(self, config, device):
         super().__init__(config, device, _BATTERY_DATA_INTERVAL)
