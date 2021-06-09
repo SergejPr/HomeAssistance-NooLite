@@ -1,0 +1,10 @@
+{
+  "domain": "noolite",
+  "version": "0.1.2",
+  "name": "HomeAssistance-NooLite",
+  "documentation": "https://github.com/SergejPr/HomeAssistance-NooLite",
+  "dependencies": [],
+  "codeowners": ["@SergejPr"],
+  "issue_tracker": "https://github.com/SergejPr/HomeAssistance-NooLite/issues",
+  "requirements": ["NooLite-F==0.1.2"]
+}
