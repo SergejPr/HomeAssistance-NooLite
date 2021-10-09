@@ -1,6 +1,3 @@
-# Weather prediction
-- platform: yr
-
 - platform: noolite
   channel: 9
   name: "living_room_sensor_temperature"

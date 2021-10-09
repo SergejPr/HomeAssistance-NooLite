@@ -2,3 +2,8 @@
   channel: 10
   name: "hall_motion"
   type: motion
+
+- platform: noolite
+  channel: 11
+  name: "kitchen_moisture"
+  type: moisture

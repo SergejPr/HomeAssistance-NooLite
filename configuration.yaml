@@ -13,9 +13,6 @@ homeassistant:
   # Customization file
   customize: !include customize.yaml
 
-# Show links to resources in log and frontend
-# introduction:
-
 # Enables the frontend
 frontend:
 
@@ -39,42 +36,18 @@ updater:
   # Optional, allows Home Assistant developers to focus on popular components.
   # include_used_components: true
 
-# Discover some devices automatically
-discovery:
-
-# Allows you to issue voice commands from the frontend in enabled browsers
-conversation:
-
 # Enables support for tracking state changes over time
 history:
 
 # View all events in a logbook
 logbook:
 
-# Enables a map showing the location of tracked devices
-map:
-
-# Track the sun
-sun:
-
-# Text to speech
-tts:
-  - platform: google
-
-group: !include groups.yaml
-automation: !include automations.yaml
-script: !include scripts.yaml
-
-ios:
-
-zone: !include zones.yaml
 
 noolite:
   port: "/dev/ttyUSB0"
 
-vacuum: !include vacuum.yaml
 light: !include lights.yaml
-switch: !include switchs.yaml
+switch: !include switches.yaml
 sensor: !include sensors.yaml
 binary_sensor: !include binary_sensors.yaml
-homekit:
+fan: !include fans.yaml

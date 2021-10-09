@@ -1,0 +1,5 @@
+- platform: noolite
+  channel: 7
+  name: "aquarium_switch"
+  scan_interval: 60
+  mode: noolite-f

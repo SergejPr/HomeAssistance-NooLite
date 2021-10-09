@@ -2,26 +2,13 @@ light.living_room_light:
   friendly_name: Living Room Light
 light.living_room_work_lights:
   friendly_name: Living Room Work Light
-light.living_room_light_rgb:
-  friendly_name: Living Room RGB Light
+light.bathroom_light:
+  friendly_name: Bathroom Light
+
 sensor.living_room_sensor_temperature:
   friendly_name: Living Room Temperature
 sensor.living_room_sensor_humidity:
   friendly_name: Living Room Humidity
-
-light.kitchen_light:
-  friendly_name: Kitchen Light
-
-light.wc_light:
-  friendly_name: WC Light
-
-light.bathroom_light:
-  friendly_name: Bathroom Light
-
-light.hall_light:
-  friendly_name: Hall Light
-light.hall_extra_light:
-  friendly_name: Hall Extra Light
 
 switch.aquarium_switch:
   friendly_name: Aquarium Light Switch
@@ -29,5 +16,9 @@ switch.aquarium_switch:
 binary_sensor.hall_motion:
   friendly_name: Motion
 
-sensor.yr_symbol:
-  friendly_name: Weater Temperature
+binary_sensor.kitchen_moisture:
+  friendly_name: Kitchen Moisture
+
+fan.sofa_fan:
+  friendly_name: My Love Fan
+

@@ -1,5 +1,6 @@
 - platform: noolite
-  channel: 11
-  name: "aquarium_switch"
+  channel: 7
+  name: "sofa_fan"
+  speed_enabled: true
   scan_interval: 60
   mode: noolite-f

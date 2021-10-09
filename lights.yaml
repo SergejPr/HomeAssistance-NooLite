@@ -14,40 +14,7 @@
   broadcast: true
 
 - platform: noolite
-  channel: 7
-  name: "living_room_light_rgb"
-  scan_interval: 60
-  mode: noolite-f
-
-- platform: noolite
   channel: 2
-  name: "kitchen_light"
-  scan_interval: 60
-  type: dimmer
-  mode: noolite-f
-
-- platform: noolite
-  channel: 4
   name: "bathroom_light"
   scan_interval: 60
-  mode: noolite-f
-
-- platform: noolite
-  channel: 5
-  name: "wc_light"
-  scan_interval: 60
-  mode: noolite-f
-
-- platform: noolite
-  channel: 6
-  name: "hall_light"
-  scan_interval: 60
-  type: dimmer
-  mode: noolite-f
-
-- platform: noolite
-  channel: 8
-  name: "hall_extra_light"
-  scan_interval: 60
-  type: dimmer
   mode: noolite-f
