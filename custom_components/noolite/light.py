@@ -2,10 +2,11 @@ import logging
 from datetime import timedelta
 
 import voluptuous as vol
-from homeassistant.components.light import LightEntity, SUPPORT_BRIGHTNESS, ATTR_BRIGHTNESS, SUPPORT_COLOR, ATTR_RGB_COLOR
+from homeassistant.components.light import LightEntity, COLOR_MODE_BRIGHTNESS, ATTR_BRIGHTNESS, COLOR_MODE_RGB, ATTR_RGB_COLOR
 from homeassistant.const import CONF_NAME, CONF_MODE
 from homeassistant.const import CONF_TYPE, CONF_SCAN_INTERVAL
 from homeassistant.helpers import config_validation as cv
+from typing import Set
 
 from custom_components.noolite import (CONF_BROADCAST, CONF_CHANNEL, MODES_NOOLITE, MODE_NOOLITE_F, DOMAIN)
 from custom_components.noolite import (NooLiteGenericModule)
@@ -60,8 +61,8 @@ class NooLiteDimmerSwitch(NooLiteSwitch):
         self._brightness = 255
 
     @property
-    def supported_features(self) -> int:
-        return SUPPORT_BRIGHTNESS
+    def supported_color_modes(self) -> Set[str]:
+        return {COLOR_MODE_BRIGHTNESS}
 
     @property
     def brightness(self):
@@ -91,8 +92,8 @@ class NooLiteRGBLedSwitch(NooLiteDimmerSwitch):
         self._rgb = [255, 255, 255]
 
     @property
-    def supported_features(self) -> int:
-        return SUPPORT_COLOR | SUPPORT_BRIGHTNESS
+    def supported_color_modes(self) -> set[str]:
+        return {COLOR_MODE_BRIGHTNESS, COLOR_MODE_RGB}
 
     @property
     def rgb_color(self):
@@ -100,17 +101,17 @@ class NooLiteRGBLedSwitch(NooLiteDimmerSwitch):
 
     def turn_on(self, **kwargs):
         rgb = kwargs.get(ATTR_RGB_COLOR)
-        if rgb is not None:
-            self._rgb = rgb
+        if rgb is None:
+            rgb = self._rgb
 
         brightness = kwargs.get(ATTR_BRIGHTNESS)
-        if brightness is not None:
-            self._brightness = brightness
+        if brightness is None:
+            brightness = self.brightness
 
-        brightness_multiplier = self._brightness / 255
-        red = (self._rgb[0] * brightness_multiplier) / 255
-        green = (self._rgb[1] * brightness_multiplier) / 255
-        blue = (self._rgb[2] * brightness_multiplier) / 255
+        brightness_multiplier = brightness / 255
+        red = (rgb[0] * brightness_multiplier) / 255
+        green = (rgb[1] * brightness_multiplier) / 255
+        blue = (rgb[2] * brightness_multiplier) / 255
 
         responses = self._device.set_rgb_brightness(red, green, blue, None, self._channel, self._broadcast, self._mode)
         if self.assumed_state:
