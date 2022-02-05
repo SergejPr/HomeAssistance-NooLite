@@ -3,29 +3,26 @@ from threading import Timer
 
 import voluptuous as vol
 from NooLite_F import BatteryState, RemoteController, TempHumiSensor
-from homeassistant.const import CONF_NAME, DEVICE_CLASS_TEMPERATURE, DEVICE_CLASS_HUMIDITY
+from homeassistant.const import CONF_NAME, PERCENTAGE, STATE_ON, \
+    STATE_OFF
 from homeassistant.const import CONF_TYPE, STATE_UNKNOWN, TEMP_CELSIUS
 from homeassistant.helpers import config_validation as cv
+from homeassistant.components.sensor import SensorEntity, SensorStateClass, SensorDeviceClass
 
-from custom_components.noolite import (CONF_CHANNEL, NooLiteGenericSensor, DOMAIN)
-from custom_components.noolite import (PLATFORM_SCHEMA)
+from . import (PLATFORM_SCHEMA)
+from .base import (NooLiteGenericSensor)
+from .const import (CONF_CHANNEL, DOMAIN,
+                    TYPE_HUMI, TYPE_TEMP, TYPE_ANALOG, TYPE_REMOTE, DATA_INTERVAL, BATTERY_DATA_INTERVAL, STATE_TUNE_UP,
+                    STATE_TUNE_DOWN, STATE_TUNE, STATE_SWITCH, STATE_SAVE_PRESET, STATE_LOAD_PRESET,
+                    REMOTE_SENSOR_RESET_STATE_TIMEOUT)
+
 
 DEPENDENCIES = ['noolite']
 
 _LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(logging.DEBUG)
 
-_TYPE_TEMP = 'temp'
-_TYPE_HUMI = 'humi'
-_TYPE_ANALOG = 'analog'
-_TYPE_REMOTE = 'remote'
-
-_TYPES = [_TYPE_HUMI, _TYPE_TEMP, _TYPE_ANALOG, _TYPE_REMOTE]
-
-_DATA_INTERVAL = 1.5 * 60 * 60
-
-_BATTERY_DATA_INTERVAL = 6 * 60 * 60
-
-MEASUREMENT_PERCENTS = "%"
+_TYPES = [TYPE_HUMI, TYPE_TEMP, TYPE_ANALOG, TYPE_REMOTE]
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_TYPE): vol.In(_TYPES),
@@ -41,95 +38,70 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     module_type = config[CONF_TYPE].lower()
 
     devices = []
-    if module_type == _TYPE_HUMI:
+    if module_type == TYPE_HUMI:
         devices.append(NooLiteHumiditySensor(config, hass.data[DOMAIN]))
-    elif module_type == _TYPE_TEMP:
+    elif module_type == TYPE_TEMP:
         devices.append(NooLiteTemperatureSensor(config, hass.data[DOMAIN]))
-    elif module_type == _TYPE_ANALOG:
+    elif module_type == TYPE_ANALOG:
         devices.append(NooLiteAnalogSensor(config, hass.data[DOMAIN]))
-    elif module_type == _TYPE_REMOTE:
+    elif module_type == TYPE_REMOTE:
         devices.append(NooLiteRemoteSensor(config, hass.data[DOMAIN]))
 
     add_devices(devices)
 
 
-class NooLiteTemperatureSensor(NooLiteGenericSensor):
+class NooLiteTemperatureSensor(NooLiteGenericSensor, SensorEntity):
     def __init__(self, config, device):
-        super().__init__(config, device, _DATA_INTERVAL)
+        super().__init__(config, device, DATA_INTERVAL)
         self._sensor = TempHumiSensor(device, self._channel, self._on_data)
+        self._attr_native_unit_of_measurement = TEMP_CELSIUS
+        self._attr_device_class = SensorDeviceClass.TEMPERATURE
+        self._attr_state_class = SensorStateClass.MEASUREMENT
 
     def _on_data(self, temp, humi, analog, battery):
         if battery == BatteryState.OK:
             self.normal_battery()
         else:
             self.low_battery()
-        self._state = temp
+        self._attr_native_value = temp
         self.schedule_update_ha_state()
 
-    @property
-    def unit_of_measurement(self):
-        return TEMP_CELSIUS
 
-    @property
-    def device_class(self):
-        return DEVICE_CLASS_TEMPERATURE
-
-    @property
-    def state(self):
-        return self._state
-
-
-class NooLiteHumiditySensor(NooLiteGenericSensor):
+class NooLiteHumiditySensor(NooLiteGenericSensor, SensorEntity):
     def __init__(self, config, device):
-        super().__init__(config, device, _DATA_INTERVAL)
+        super().__init__(config, device, DATA_INTERVAL)
         self._sensor = TempHumiSensor(device, self._channel, self._on_data)
+        self._attr_native_unit_of_measurement = PERCENTAGE
+        self._attr_device_class = SensorDeviceClass.HUMIDITY
+        self._attr_state_class = SensorStateClass.MEASUREMENT
 
     def _on_data(self, temp, humi, analog, battery):
         if battery == BatteryState.OK:
             self.normal_battery()
         else:
             self.low_battery()
-        self._state = humi
+        self._attr_native_value = humi
         self.schedule_update_ha_state()
 
-    @property
-    def unit_of_measurement(self):
-        return MEASUREMENT_PERCENTS
 
-    @property
-    def device_class(self):
-        return DEVICE_CLASS_HUMIDITY
-
-    @property
-    def state(self):
-        return self._state
-
-
-class NooLiteAnalogSensor(NooLiteGenericSensor):
+class NooLiteAnalogSensor(NooLiteGenericSensor, SensorEntity):
     def __init__(self, config, device):
-        super().__init__(config, device, _DATA_INTERVAL)
+        super().__init__(config, device, DATA_INTERVAL)
         self._sensor = TempHumiSensor(device, self._channel, self._on_data)
+        self._attr_state_class = SensorStateClass.MEASUREMENT
 
     def _on_data(self, temp, humi, analog, battery):
         if battery == BatteryState.OK:
             self.normal_battery()
         else:
             self.low_battery()
-        self._state = analog
+        self._attr_native_value = analog
         self.schedule_update_ha_state()
-
-    @property
-    def unit_of_measurement(self):
-        return ""
-
-    @property
-    def state(self):
-        return self._state
 
 
 class NooLiteRemoteSensor(NooLiteGenericSensor):
     def __init__(self, config, device):
-        super().__init__(config, device, _BATTERY_DATA_INTERVAL)
+        super().__init__(config, device, BATTERY_DATA_INTERVAL)
         self._sensor = RemoteController(controller=device,
                                         channel=self._channel,
                                         on_on=self._on_on,
@@ -145,7 +117,7 @@ class NooLiteRemoteSensor(NooLiteGenericSensor):
 
     def _start_timer(self):
         self._cancel_timer()
-        self._timer = Timer(0.2, self._reset_state)
+        self._timer = Timer(REMOTE_SENSOR_RESET_STATE_TIMEOUT, self._reset_state)
         self._timer.start()
 
     def _cancel_timer(self):
@@ -155,20 +127,20 @@ class NooLiteRemoteSensor(NooLiteGenericSensor):
 
     def _reset_state(self):
         self._cancel_timer()
-        self._state = STATE_UNKNOWN
+        self._attr_state = STATE_UNKNOWN
         self.schedule_update_ha_state()
 
     def _on_on(self):
         _LOGGER.debug('remote_sensor on_on')
         self.action_detected()
-        self._state = 'ON'
+        self._attr_state = STATE_ON
         self.schedule_update_ha_state()
         self._start_timer()
 
     def _on_off(self):
         _LOGGER.debug('remote_sensor on_off')
         self.action_detected()
-        self._state = "OFF"
+        self._attr_state = STATE_OFF
         self.schedule_update_ha_state()
         self._start_timer()
 
@@ -177,15 +149,15 @@ class NooLiteRemoteSensor(NooLiteGenericSensor):
         _LOGGER.debug('remote_sensor on_tune_start. direction {0}'.format(direction))
         self.action_detected()
         if direction == Direction.UP:
-            self._state = 'TUNE_UP'
+            self._attr_state = STATE_TUNE_UP
         elif direction == Direction.DOWN:
-            self._state = 'TUNE_DOWN'
+            self._attr_state = STATE_TUNE_DOWN
         self.schedule_update_ha_state()
 
     def _on_tune_back(self):
         _LOGGER.debug('remote_sensor on_tune_back')
         self.action_detected()
-        self._state = "TUNE"
+        self._attr_state = STATE_TUNE
         self.schedule_update_ha_state()
 
     def _on_tune_stop(self):
@@ -197,21 +169,21 @@ class NooLiteRemoteSensor(NooLiteGenericSensor):
     def _on_switch(self):
         _LOGGER.debug('remote_sensor on_switch')
         self.action_detected()
-        self._state = "SWITCH"
+        self._attr_state = STATE_SWITCH
         self.schedule_update_ha_state()
         self._start_timer()
 
     def _on_load_preset(self):
         _LOGGER.debug('remote_sensor on_load_preset')
         self.action_detected()
-        self._state = "LOAD_PRESET"
+        self._attr_state = STATE_LOAD_PRESET
         self.schedule_update_ha_state()
         self._start_timer()
 
     def _on_save_preset(self):
         _LOGGER.debug('remote_sensor on_save_preset')
         self.action_detected()
-        self._state = "SAVE_PRESET"
+        self._attr_state = STATE_SAVE_PRESET
         self.schedule_update_ha_state()
         self._start_timer()
 
@@ -222,7 +194,3 @@ class NooLiteRemoteSensor(NooLiteGenericSensor):
     @property
     def force_update(self):
         return True
-
-    @property
-    def state(self):
-        return self._state

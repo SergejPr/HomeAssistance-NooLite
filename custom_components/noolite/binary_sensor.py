@@ -10,35 +10,24 @@ from homeassistant.const import CONF_NAME
 from homeassistant.const import CONF_TYPE
 from homeassistant.helpers import config_validation as cv
 
-from custom_components.noolite import (CONF_CHANNEL, BATTERY_LEVEL_DISCHARGED,
-                                       BATTERY_LEVEL_NORMAL, NooLiteGenericSensor, DOMAIN)
-from custom_components.noolite import (PLATFORM_SCHEMA)
+from . import (PLATFORM_SCHEMA)
+from .base import (NooLiteGenericSensor)
+from .const import (CONF_CHANNEL, BATTERY_LEVEL_DISCHARGED, BATTERY_LEVEL_NORMAL, DOMAIN,
+                    TYPE_MOTION, TYPE_BATTERY, TYPE_DOOR, TYPE_GARAGE_DOOR, TYPE_MOISTURE, TYPE_OPENING, TYPE_WINDOW,
+                    TYPE_LIGHT, TYPE_REMOTE, BATTERY_DATA_INTERVAL, BINARY_SENSOR_DATA_INTERVAL)
 
 DEPENDENCIES = ['noolite']
 
 _LOGGER = logging.getLogger(__name__)
 
-_TYPE_DOOR = 'door'
-_TYPE_GARAGE_DOOR = 'garage_door'
-_TYPE_MOISTURE = 'moisture'
-_TYPE_OPENING = 'opening'
-_TYPE_WINDOW = 'window'
-_TYPE_LIGHT = 'light'
-_TYPE_MOTION = 'motion'
-_TYPE_BATTERY = 'battery'
-_TYPE_REMOTE = 'remote'
-
-_TYPES = [_TYPE_MOTION, _TYPE_BATTERY, _TYPE_DOOR, _TYPE_GARAGE_DOOR, _TYPE_MOISTURE, _TYPE_OPENING, _TYPE_WINDOW,
-          _TYPE_LIGHT, _TYPE_REMOTE]
+_TYPES = [TYPE_MOTION, TYPE_BATTERY, TYPE_DOOR, TYPE_GARAGE_DOOR, TYPE_MOISTURE, TYPE_OPENING, TYPE_WINDOW,
+          TYPE_LIGHT, TYPE_REMOTE]
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
-    vol.Optional(CONF_TYPE, default=_TYPE_OPENING): vol.In(_TYPES),
+    vol.Optional(CONF_TYPE, default=TYPE_OPENING): vol.In(_TYPES),
     vol.Required(CONF_NAME): cv.string,
     vol.Required(CONF_CHANNEL): cv.positive_int,
 })
-
-_DATA_INTERVAL = 13 * 60 * 60
-_BATTERY_DATA_INTERVAL = 6 * 60 * 60
 
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
@@ -48,11 +37,11 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     module_type = config[CONF_TYPE].lower()
 
     devices = []
-    if module_type == _TYPE_MOTION:
+    if module_type == TYPE_MOTION:
         devices.append(NooLiteMotionSensor(config, hass.data[DOMAIN]))
-    elif module_type == _TYPE_BATTERY:
+    elif module_type == TYPE_BATTERY:
         devices.append(NooLiteBatterySensor(config, hass.data[DOMAIN]))
-    elif module_type == _TYPE_REMOTE:
+    elif module_type == TYPE_REMOTE:
         devices.append(NooLiteRemoteSensor(config, hass.data[DOMAIN]))
     else:
         devices.append(NooLiteBinarySensor(config, hass.data[DOMAIN]))
@@ -126,7 +115,7 @@ class NooLiteBatterySensor(NooLiteGenericSensor, BinarySensorEntity):
                 self._on_battery_low()
 
     def __init__(self, config, device):
-        super().__init__(config, device, _BATTERY_DATA_INTERVAL)
+        super().__init__(config, device, BATTERY_DATA_INTERVAL)
         self._sensor = self.Receiver(device, self._channel, self.action_detected, self.low_battery,
                                      self.normal_battery)
 
@@ -135,17 +124,13 @@ class NooLiteBatterySensor(NooLiteGenericSensor, BinarySensorEntity):
         return "battery"
 
     @property
-    def state_attributes(self):
-        return None
-
-    @property
     def is_on(self):
         return self.battery != BATTERY_LEVEL_NORMAL
 
 
 class NooLiteMotionSensor(NooLiteGenericSensor, BinarySensorEntity):
     def __init__(self, config, device):
-        super().__init__(config, device, _BATTERY_DATA_INTERVAL)
+        super().__init__(config, device, BATTERY_DATA_INTERVAL)
         self._sensor = MotionSensor(device, self._channel, self._on_motion, self.low_battery)
         self._time = time.time()
         self._timer = None
@@ -182,24 +167,24 @@ class NooLiteMotionSensor(NooLiteGenericSensor, BinarySensorEntity):
 
 class NooLiteBinarySensor(NooLiteGenericSensor, BinarySensorEntity):
     def __init__(self, config, device):
-        super().__init__(config, device, _BATTERY_DATA_INTERVAL)
+        super().__init__(config, device, BATTERY_DATA_INTERVAL)
         self._device_class = config[CONF_TYPE]
         self._sensor = BinarySensor(device, self._channel, self._on_on, self._on_off, self.low_battery)
         self._timer = None
 
     def _on_on(self):
-        self._state = True
+        self._attr_is_on = True
         self.action_detected()
         self.schedule_update_ha_state()
 
     def _on_off(self):
-        self._state = False
+        self._attr_is_on = False
         self.action_detected()
         self.schedule_update_ha_state()
 
     def _start_timer(self):
         self._cancel_timer()
-        self._timer = Timer(_DATA_INTERVAL, self._on_timer)
+        self._timer = Timer(BINARY_SENSOR_DATA_INTERVAL, self._on_timer)
         self._timer.start()
 
     def _cancel_timer(self):
@@ -209,7 +194,7 @@ class NooLiteBinarySensor(NooLiteGenericSensor, BinarySensorEntity):
 
     def _on_timer(self):
         self._cancel_timer()
-        self._state = None
+        self._attr_is_on = None
         self._battery = BATTERY_LEVEL_DISCHARGED
         self.schedule_update_ha_state()
 
@@ -220,15 +205,11 @@ class NooLiteBinarySensor(NooLiteGenericSensor, BinarySensorEntity):
     def device_class(self):
         return self._device_class
 
-    @property
-    def is_on(self):
-        return self._state
-
 
 class NooLiteRemoteSensor(NooLiteGenericSensor, BinarySensorEntity):
 
     def __init__(self, config, device):
-        super().__init__(config, device, _BATTERY_DATA_INTERVAL)
+        super().__init__(config, device, BATTERY_DATA_INTERVAL)
         self._sensor = RemoteController(controller=device,
                                         channel=self._channel,
                                         on_on=self._on_on,
@@ -239,22 +220,18 @@ class NooLiteRemoteSensor(NooLiteGenericSensor, BinarySensorEntity):
                                         on_tune_stop=None,
                                         on_load_preset=None,
                                         on_save_preset=None,
-                                        on_battery_low=None)
+                                        on_battery_low=self.low_battery)
 
     def _on_on(self):
-        self._state = True
+        self._attr_is_on = True
         self.schedule_update_ha_state()
         self.action_detected()
 
     def _on_off(self):
-        self._state = False
+        self._attr_is_on = False
         self.schedule_update_ha_state()
         self.action_detected()
 
     @property
     def device_class(self):
         return "remote"
-
-    @property
-    def is_on(self):
-        return self._state
