@@ -233,58 +233,27 @@ class NooLiteRemoteSensor(NooLiteGenericSensor, BinarySensorEntity):
                                         channel=self._channel,
                                         on_on=self._on_on,
                                         on_off=self._on_off,
-                                        on_switch=self._on_switch,
-                                        on_tune_start=self.action_detected,
-                                        on_tune_back=self.action_detected,
-                                        on_tune_stop=self.action_detected,
-                                        on_load_preset=self._on_load_preset,
-                                        on_save_preset=self.action_detected,
-                                        on_battery_low=self.low_battery)
-        self._timer = None
-
-    def _start_timer(self):
-        self._cancel_timer()
-        self._timer = Timer(0.2, self._switch_off)
-        self._timer.start()
-
-    def _cancel_timer(self):
-        if self._timer is not None:
-            self._timer.cancel()
-        self.timer = None
+                                        on_switch=None,
+                                        on_tune_start=None,
+                                        on_tune_back=None,
+                                        on_tune_stop=None,
+                                        on_load_preset=None,
+                                        on_save_preset=None,
+                                        on_battery_low=None)
 
     def _on_on(self):
-        self.action_detected()
-        self._switch_on()
+        self._state = True
         self.schedule_update_ha_state()
-
-        """keep active state for 200ms"""
-        self._start_timer()
+        self.action_detected()
 
     def _on_off(self):
-        self.action_detected()
-        self._cancel_timer()
-        self._switch_off()
-        self.schedule_update_ha_state()
-
-    def _switch_on(self):
-        self._state = True
-
-    def _switch_off(self):
         self._state = False
         self.schedule_update_ha_state()
-
-    def _on_switch(self):
         self.action_detected()
-        self._cancel_timer()
-        self._switch_on() if not self.is_on else self._switch_off()
-        self.schedule_update_ha_state()
-
-    def _on_load_preset(self):
-        self._on_on()
 
     @property
     def device_class(self):
-        return "remote.py"
+        return "remote"
 
     @property
     def is_on(self):

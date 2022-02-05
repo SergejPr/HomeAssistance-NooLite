@@ -134,12 +134,12 @@ class NooLiteRemoteSensor(NooLiteGenericSensor):
                                         channel=self._channel,
                                         on_on=self._on_on,
                                         on_off=self._on_off,
-                                        on_switch=self.action_detected,
+                                        on_switch=self._on_switch,
                                         on_tune_start=self._on_tune_start,
                                         on_tune_back=self._on_tune_back,
                                         on_tune_stop=self._on_tune_stop,
-                                        on_load_preset=self.action_detected,
-                                        on_save_preset=self.action_detected,
+                                        on_load_preset=self._on_load_preset,
+                                        on_save_preset=self._on_save_preset,
                                         on_battery_low=self.low_battery)
         self._timer = None
 
@@ -177,19 +177,41 @@ class NooLiteRemoteSensor(NooLiteGenericSensor):
         _LOGGER.debug('remote_sensor on_tune_start. direction {0}'.format(direction))
         self.action_detected()
         if direction == Direction.UP:
-            self._state = 'UP'
+            self._state = 'TUNE_UP'
         elif direction == Direction.DOWN:
-            self._state = 'DOWN'
+            self._state = 'TUNE_DOWN'
         self.schedule_update_ha_state()
 
     def _on_tune_back(self):
         _LOGGER.debug('remote_sensor on_tune_back')
         self.action_detected()
+        self._state = "TUNE"
+        self.schedule_update_ha_state()
 
     def _on_tune_stop(self):
         _LOGGER.debug('remote_sensor on_tune_stop')
         self.action_detected()
-        self._state = "STOP"
+        self._reset_state()
+        self.schedule_update_ha_state()
+
+    def _on_switch(self):
+        _LOGGER.debug('remote_sensor on_switch')
+        self.action_detected()
+        self._state = "SWITCH"
+        self.schedule_update_ha_state()
+        self._start_timer()
+
+    def _on_load_preset(self):
+        _LOGGER.debug('remote_sensor on_load_preset')
+        self.action_detected()
+        self._state = "LOAD_PRESET"
+        self.schedule_update_ha_state()
+        self._start_timer()
+
+    def _on_save_preset(self):
+        _LOGGER.debug('remote_sensor on_save_preset')
+        self.action_detected()
+        self._state = "SAVE_PRESET"
         self.schedule_update_ha_state()
         self._start_timer()
 
