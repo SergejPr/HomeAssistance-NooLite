@@ -9,11 +9,10 @@ from homeassistant.helpers import config_validation as cv
 from . import (PLATFORM_SCHEMA)
 from .base import (NooLiteGenericModule, should_pull_on_start)
 from .const import (CONF_BROADCAST, CONF_CHANNEL, MODES_NOOLITE, MODE_NOOLITE_F, DOMAIN, SCAN_INTERVAL,
-                    TYPE_LIGHT, TYPE_DIMMER, TYPE_RGB_LED)
-
-DEPENDENCIES = ['noolite']
+                    TYPE_LIGHT, TYPE_DIMMER, TYPE_RGB_LED, LOG_LEVEL)
 
 _LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(LOG_LEVEL)
 
 _TYPES = [TYPE_LIGHT, TYPE_DIMMER, TYPE_RGB_LED]
 

@@ -8,11 +8,10 @@ from homeassistant.helpers import config_validation as cv
 from . import (PLATFORM_SCHEMA)
 from .base import (NooLiteGenericModule, should_pull_on_start)
 from .const import (CONF_BROADCAST, CONF_CHANNEL, MODES_NOOLITE, MODE_NOOLITE_F, DOMAIN, CONF_SPEED_ENABLED,
-                    SCAN_INTERVAL, CONF_SPEED_COUNT)
-
-DEPENDENCIES = ['noolite']
+                    SCAN_INTERVAL, CONF_SPEED_COUNT, LOG_LEVEL)
 
 _LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(LOG_LEVEL)
 
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({

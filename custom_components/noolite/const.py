@@ -1,4 +1,7 @@
+import logging
 from datetime import timedelta
+
+LOG_LEVEL = logging.WARNING
 
 DOMAIN = 'noolite'
 
@@ -33,17 +36,24 @@ TYPE_OPENING = 'opening'
 TYPE_WINDOW = 'window'
 TYPE_MOTION = 'motion'
 TYPE_BATTERY = 'battery'
-TYPE_REMOTE = 'remote'
 TYPE_TEMP = 'temp'
 TYPE_HUMI = 'humi'
 TYPE_ANALOG = 'analog'
 
-STATE_TUNE = 'tune'
+TYPE_REMOTE = 'remote'
+TYPE_RGB_REMOTE = 'rgb_remote'
+
+STATE_TUNE_BACK = 'tune_back'
 STATE_TUNE_UP = 'tune_up'
 STATE_TUNE_DOWN = 'tune_down'
+STATE_TUNE_STOP = 'tune_stop'
 
 STATE_SWITCH = 'switch'
 STATE_LOAD_PRESET = 'load_preset'
 STATE_SAVE_PRESET = 'save_preset'
+STATE_ROLL_COLOR = 'roll_color'
+STATE_SWITCH_COLOR = 'switch_color'
+STATE_SWITCH_MODE = 'switch_mode'
+STATE_SWITCH_SPEED = 'switch_speed'
 
-REMOTE_SENSOR_RESET_STATE_TIMEOUT = 0.2
+REMOTE_CONTROL_RESET_STATE_TIMEOUT = 0.2

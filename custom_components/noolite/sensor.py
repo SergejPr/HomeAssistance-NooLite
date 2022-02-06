@@ -1,27 +1,25 @@
 import logging
-from threading import Timer
 
 import voluptuous as vol
-from NooLite_F import BatteryState, RemoteController, TempHumiSensor
+from NooLite_F import BatteryState, RemoteController, TempHumiSensor, RGBRemoteController
 from homeassistant.const import CONF_NAME, PERCENTAGE, STATE_ON, \
     STATE_OFF
-from homeassistant.const import CONF_TYPE, STATE_UNKNOWN, TEMP_CELSIUS
+from homeassistant.const import CONF_TYPE, TEMP_CELSIUS
 from homeassistant.helpers import config_validation as cv
 from homeassistant.components.sensor import SensorEntity, SensorStateClass, SensorDeviceClass
 
 from . import (PLATFORM_SCHEMA)
-from .base import (NooLiteGenericSensor)
+from .base import (NooLiteGenericSensor, NooLiteGenericRemoteController)
 from .const import (CONF_CHANNEL, DOMAIN,
                     TYPE_HUMI, TYPE_TEMP, TYPE_ANALOG, TYPE_REMOTE, DATA_INTERVAL, BATTERY_DATA_INTERVAL, STATE_TUNE_UP,
-                    STATE_TUNE_DOWN, STATE_TUNE, STATE_SWITCH, STATE_SAVE_PRESET, STATE_LOAD_PRESET,
-                    REMOTE_SENSOR_RESET_STATE_TIMEOUT)
-
-
-DEPENDENCIES = ['noolite']
+                    STATE_TUNE_DOWN, STATE_SWITCH, STATE_SAVE_PRESET, STATE_LOAD_PRESET,
+                    STATE_ROLL_COLOR, STATE_SWITCH_COLOR, STATE_SWITCH_MODE, STATE_SWITCH_SPEED, TYPE_RGB_REMOTE,
+                    LOG_LEVEL, STATE_TUNE_BACK, STATE_TUNE_STOP)
 
 _LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(LOG_LEVEL)
 
-_TYPES = [TYPE_HUMI, TYPE_TEMP, TYPE_ANALOG, TYPE_REMOTE]
+_TYPES = [TYPE_HUMI, TYPE_TEMP, TYPE_ANALOG, TYPE_REMOTE, TYPE_RGB_REMOTE]
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_TYPE): vol.In(_TYPES),
@@ -44,7 +42,9 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     elif module_type == TYPE_ANALOG:
         devices.append(NooLiteAnalogSensor(config, hass.data[DOMAIN]))
     elif module_type == TYPE_REMOTE:
-        devices.append(NooLiteRemoteSensor(config, hass.data[DOMAIN]))
+        devices.append(NooLiteRemoteController(config, hass.data[DOMAIN]))
+    elif module_type == TYPE_RGB_REMOTE:
+        devices.append(NooLiteRGBRemoteController(config, hass.data[DOMAIN]))
 
     add_devices(devices)
 
@@ -98,7 +98,7 @@ class NooLiteAnalogSensor(NooLiteGenericSensor, SensorEntity):
         self.schedule_update_ha_state()
 
 
-class NooLiteRemoteSensor(NooLiteGenericSensor):
+class NooLiteRemoteController(NooLiteGenericRemoteController):
     def __init__(self, config, device):
         super().__init__(config, device, BATTERY_DATA_INTERVAL)
         self._sensor = RemoteController(controller=device,
@@ -112,84 +112,67 @@ class NooLiteRemoteSensor(NooLiteGenericSensor):
                                         on_load_preset=self._on_load_preset,
                                         on_save_preset=self._on_save_preset,
                                         on_battery_low=self.low_battery)
-        self._timer = None
-
-    def _start_timer(self):
-        self._cancel_timer()
-        self._timer = Timer(REMOTE_SENSOR_RESET_STATE_TIMEOUT, self._reset_state)
-        self._timer.start()
-
-    def _cancel_timer(self):
-        if self._timer is not None:
-            self._timer.cancel()
-        self.timer = None
-
-    def _reset_state(self):
-        self._cancel_timer()
-        self._attr_state = STATE_UNKNOWN
-        self.schedule_update_ha_state()
 
     def _on_on(self):
-        _LOGGER.debug('remote_sensor on_on')
-        self.action_detected()
-        self._attr_state = STATE_ON
-        self.schedule_update_ha_state()
-        self._start_timer()
+        self.set_state(STATE_ON)
 
     def _on_off(self):
-        _LOGGER.debug('remote_sensor on_off')
-        self.action_detected()
-        self._attr_state = STATE_OFF
-        self.schedule_update_ha_state()
-        self._start_timer()
+        self.set_state(STATE_OFF)
+
+    def _on_switch(self):
+        self.set_state(STATE_SWITCH)
+
+    def _on_load_preset(self):
+        self.set_state(STATE_LOAD_PRESET)
+
+    def _on_save_preset(self):
+        self.set_state(STATE_SAVE_PRESET)
 
     def _on_tune_start(self, direction):
         from NooLite_F import Direction
-        _LOGGER.debug('remote_sensor on_tune_start. direction {0}'.format(direction))
-        self.action_detected()
         if direction == Direction.UP:
-            self._attr_state = STATE_TUNE_UP
+            self.set_state(STATE_TUNE_UP)
         elif direction == Direction.DOWN:
-            self._attr_state = STATE_TUNE_DOWN
-        self.schedule_update_ha_state()
+            self.set_state(STATE_TUNE_DOWN)
 
     def _on_tune_back(self):
-        _LOGGER.debug('remote_sensor on_tune_back')
-        self.action_detected()
-        self._attr_state = STATE_TUNE
-        self.schedule_update_ha_state()
+        self.set_state(STATE_TUNE_BACK)
 
     def _on_tune_stop(self):
-        _LOGGER.debug('remote_sensor on_tune_stop')
-        self.action_detected()
-        self._reset_state()
-        self.schedule_update_ha_state()
+        self.set_state(STATE_TUNE_STOP)
+
+
+class NooLiteRGBRemoteController(NooLiteGenericRemoteController):
+    def __init__(self, config, device):
+        super().__init__(config, device, BATTERY_DATA_INTERVAL)
+        self._sensor = RGBRemoteController(controller=device,
+                                           channel=self._channel,
+                                           on_switch=self._on_switch,
+                                           on_tune_back=self._on_tune_back,
+                                           on_tune_stop=self._on_tune_stop,
+                                           on_roll_color=self._on_roll_color,
+                                           on_switch_color=self._on_switch_color,
+                                           on_switch_mode=self._on_switch_mode,
+                                           on_switch_speed=self._on_switch_speed,
+                                           on_battery_low=self.low_battery)
 
     def _on_switch(self):
-        _LOGGER.debug('remote_sensor on_switch')
-        self.action_detected()
-        self._attr_state = STATE_SWITCH
-        self.schedule_update_ha_state()
-        self._start_timer()
+        self.set_state(STATE_SWITCH)
 
-    def _on_load_preset(self):
-        _LOGGER.debug('remote_sensor on_load_preset')
-        self.action_detected()
-        self._attr_state = STATE_LOAD_PRESET
-        self.schedule_update_ha_state()
-        self._start_timer()
+    def _on_tune_back(self):
+        self.set_state(STATE_TUNE_BACK)
 
-    def _on_save_preset(self):
-        _LOGGER.debug('remote_sensor on_save_preset')
-        self.action_detected()
-        self._attr_state = STATE_SAVE_PRESET
-        self.schedule_update_ha_state()
-        self._start_timer()
+    def _on_tune_stop(self):
+        self.set_state(STATE_TUNE_STOP)
 
-    @property
-    def unit_of_measurement(self):
-        return ""
+    def _on_roll_color(self):
+        self.set_state(STATE_ROLL_COLOR)
 
-    @property
-    def force_update(self):
-        return True
+    def _on_switch_color(self):
+        self.set_state(STATE_SWITCH_COLOR)
+
+    def _on_switch_mode(self):
+        self.set_state(STATE_SWITCH_MODE)
+
+    def _on_switch_speed(self):
+        self.set_state(STATE_SWITCH_SPEED)

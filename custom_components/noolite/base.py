@@ -1,14 +1,14 @@
 import logging
 from threading import Timer
 
-from homeassistant.const import CONF_NAME, CONF_MODE, ATTR_BATTERY_LEVEL
+from homeassistant.const import CONF_NAME, CONF_MODE, ATTR_BATTERY_LEVEL, STATE_UNKNOWN
 from homeassistant.helpers.entity import ToggleEntity, Entity
 
 from .const import (MODE_NOOLITE, CONF_BROADCAST, CONF_CHANNEL, BATTERY_LEVEL_LOW, BATTERY_LEVEL_NORMAL,
-                    BATTERY_LEVEL_DISCHARGED)
-
+                    BATTERY_LEVEL_DISCHARGED, REMOTE_CONTROL_RESET_STATE_TIMEOUT, LOG_LEVEL)
 
 _LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(LOG_LEVEL)
 
 
 def _module_mode(config):
@@ -154,3 +154,32 @@ class NooLiteGenericSensor(Entity):
 
     def update(self):
         pass
+
+
+class NooLiteGenericRemoteController(NooLiteGenericSensor):
+    def __init__(self, config, device, battery_timeout):
+        super().__init__(config, device, battery_timeout)
+        self._timer = None
+        self._attr_force_update = True
+
+    def set_state(self, state: str):
+        _LOGGER.debug('{0} state received: {1}'.format(self.name, state))
+        self.action_detected()
+        self._attr_state = state
+        self.schedule_update_ha_state()
+        self._start_timer()
+
+    def reset_state(self):
+        self._cancel_timer()
+        self._attr_state = STATE_UNKNOWN
+        self.schedule_update_ha_state()
+
+    def _start_timer(self):
+        self._cancel_timer()
+        self._timer = Timer(REMOTE_CONTROL_RESET_STATE_TIMEOUT, self.reset_state)
+        self._timer.start()
+
+    def _cancel_timer(self):
+        if self._timer is not None:
+            self._timer.cancel()
+        self.timer = None
