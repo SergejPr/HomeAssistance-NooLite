@@ -8,7 +8,7 @@ from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.helpers import config_validation as cv
 
 from . import (PLATFORM_SCHEMA)
-from .base import (NooLiteGenericModule)
+from .base import (NooLiteGenericModule, should_pull_on_start)
 from .const import (CONF_BROADCAST, CONF_CHANNEL, MODES_NOOLITE, MODE_NOOLITE_F, DOMAIN, SCAN_INTERVAL)
 
 DEPENDENCIES = ['noolite']
@@ -28,7 +28,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Setup the NooLite platform."""
     _LOGGER.info(config)
-    add_devices([NooLiteSwitchDevice(config, hass.data[DOMAIN])])
+    add_devices([NooLiteSwitchDevice(config, hass.data[DOMAIN])], should_pull_on_start(config))
 
 
 class NooLiteSwitchDevice(NooLiteGenericModule, SwitchEntity):

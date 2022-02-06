@@ -7,7 +7,7 @@ from homeassistant.const import (CONF_NAME, CONF_MODE, CONF_TYPE, CONF_SCAN_INTE
 from homeassistant.helpers import config_validation as cv
 
 from . import (PLATFORM_SCHEMA)
-from .base import (NooLiteGenericModule)
+from .base import (NooLiteGenericModule, should_pull_on_start)
 from .const import (CONF_BROADCAST, CONF_CHANNEL, MODES_NOOLITE, MODE_NOOLITE_F, DOMAIN, SCAN_INTERVAL,
                     TYPE_LIGHT, TYPE_DIMMER, TYPE_RGB_LED)
 
@@ -41,7 +41,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     elif module_type == TYPE_RGB_LED:
         devices.append(NooLiteRGBLedSwitch(config, hass.data[DOMAIN]))
 
-    add_devices(devices)
+    add_devices(devices, should_pull_on_start(config))
 
 
 class NooLiteSwitch(NooLiteGenericModule, LightEntity):
@@ -54,8 +54,8 @@ class NooLiteDimmerSwitch(NooLiteSwitch):
         self._attr_brightness = 255
         self._attr_supported_color_modes = {COLOR_MODE_BRIGHTNESS}
 
-    def _update_state_from(self, responses):
-        super()._update_state_from(responses)
+    def _update_state_from(self, responses, ignore_next=True):
+        super()._update_state_from(responses, ignore_next)
         if self.is_on:
             self._attr_brightness = self._level * 255
 

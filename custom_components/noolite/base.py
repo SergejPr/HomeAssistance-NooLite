@@ -7,6 +7,10 @@ from homeassistant.helpers.entity import ToggleEntity, Entity
 from .const import (MODE_NOOLITE, CONF_BROADCAST, CONF_CHANNEL, BATTERY_LEVEL_LOW, BATTERY_LEVEL_NORMAL,
                     BATTERY_LEVEL_DISCHARGED)
 
+from NooLite_F.MTRF64.MTRF64Adapter import _LOGGER as ADAPTER_LOGGER
+
+ADAPTER_LOGGER.setLevel(logging.DEBUG)
+
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.INFO)
 
@@ -17,16 +21,21 @@ def _module_mode(config):
     mode = config[CONF_MODE].lower()
 
     if mode == MODE_NOOLITE:
-        module_mode = ModuleMode.NOOLITE
+        mode_enum_value = ModuleMode.NOOLITE
     else:
-        module_mode = ModuleMode.NOOLITE_F
+        mode_enum_value = ModuleMode.NOOLITE_F
 
-    return module_mode
+    return mode_enum_value
 
 
 def _is_module_on(module_state) -> bool:
     from NooLite_F import ModuleState
     return module_state.state == ModuleState.ON or module_state.state == ModuleState.TEMPORARY_ON
+
+
+def should_pull_on_start(config) -> bool:
+    from NooLite_F import ModuleMode
+    return _module_mode(config) == ModuleMode.NOOLITE_F
 
 
 class NooLiteGenericModule(ToggleEntity):
@@ -39,6 +48,7 @@ class NooLiteGenericModule(ToggleEntity):
         self._level = 0.0
         self._attr_assumed_state = self._mode == ModuleMode.NOOLITE
         self._attr_name = config[CONF_NAME]
+        self._ignore_next_update = False
 
     def turn_on(self, **kwargs):
         responses = self._device.on(None, self._channel, self._broadcast, self._mode)
@@ -62,12 +72,19 @@ class NooLiteGenericModule(ToggleEntity):
             self._update_state_from(responses)
 
     def update(self):
-        _LOGGER.info("!!! update")
+        # HA calls update method after execution any command to sync state,
+        # but for Noolite-F we update state from command response, so ignore update after command
+        # to decrease requests count
+        if self._ignore_next_update:
+            self._ignore_next_update = False
+            return
+
+        _LOGGER.info("!!! update %s", self.name)
         if not self.assumed_state:
             responses = self._device.read_state(None, self._channel, self._broadcast, self._mode)
-            self._update_state_from(responses)
+            self._update_state_from(responses, False)
 
-    def _update_state_from(self, responses):
+    def _update_state_from(self, responses, ignore_next=True):
         state = False
         level = 0.0
         for (result, info, module_state) in responses:
@@ -76,6 +93,7 @@ class NooLiteGenericModule(ToggleEntity):
                 level = max(module_state.brightness, level)
         self._attr_is_on = state
         self._level = level
+        self._ignore_next_update = ignore_next
 
 
 class NooLiteGenericSensor(Entity):
