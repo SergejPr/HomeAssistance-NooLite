@@ -80,15 +80,24 @@ class NooLiteGenericModule(ToggleEntity):
             self._update_state_from(responses, False)
 
     def _update_state_from(self, responses, ignore_next=True):
-        state = False
+        state = None
         level = 0.0
+
         for (result, info, module_state) in responses:
-            if result and module_state is not None and _is_module_on(module_state):
-                state = True
-                level = max(module_state.brightness, level)
+            if result and module_state is not None:
+                is_module_on = _is_module_on(module_state)
+                if is_module_on:
+                    state = True
+                    level = max(module_state.brightness, level)
+                elif state is None:
+                    state = False
+
         self._attr_is_on = state
         self._level = level
-        self._ignore_next_update = ignore_next
+
+        # if state is None (can't receive response/module state) then don't ignore next update
+        # to give one more chance to receive data
+        self._ignore_next_update = state is not None and ignore_next
 
 
 class NooLiteGenericSensor(Entity):
