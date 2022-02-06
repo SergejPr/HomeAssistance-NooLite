@@ -7,12 +7,8 @@ from homeassistant.helpers.entity import ToggleEntity, Entity
 from .const import (MODE_NOOLITE, CONF_BROADCAST, CONF_CHANNEL, BATTERY_LEVEL_LOW, BATTERY_LEVEL_NORMAL,
                     BATTERY_LEVEL_DISCHARGED)
 
-from NooLite_F.MTRF64.MTRF64Adapter import _LOGGER as ADAPTER_LOGGER
-
-ADAPTER_LOGGER.setLevel(logging.DEBUG)
 
 _LOGGER = logging.getLogger(__name__)
-_LOGGER.setLevel(logging.INFO)
 
 
 def _module_mode(config):
@@ -79,7 +75,6 @@ class NooLiteGenericModule(ToggleEntity):
             self._ignore_next_update = False
             return
 
-        _LOGGER.info("!!! update %s", self.name)
         if not self.assumed_state:
             responses = self._device.read_state(None, self._channel, self._broadcast, self._mode)
             self._update_state_from(responses, False)

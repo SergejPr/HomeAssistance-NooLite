@@ -20,7 +20,6 @@ from .const import (CONF_CHANNEL, DOMAIN,
 DEPENDENCIES = ['noolite']
 
 _LOGGER = logging.getLogger(__name__)
-_LOGGER.setLevel(logging.DEBUG)
 
 _TYPES = [TYPE_HUMI, TYPE_TEMP, TYPE_ANALOG, TYPE_REMOTE]
 
