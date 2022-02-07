@@ -19,9 +19,6 @@ CONFIG_SCHEMA = vol.Schema({
     }),
 }, extra=vol.ALLOW_EXTRA)
 
-PLATFORM_SCHEMA = vol.Schema({
-}, extra=vol.ALLOW_EXTRA)
-
 
 def setup(hass, config):
     """Set up the connection to the NooLite device."""

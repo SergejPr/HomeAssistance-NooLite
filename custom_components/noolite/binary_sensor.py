@@ -5,12 +5,11 @@ from threading import Timer
 import voluptuous as vol
 from NooLite_F import RemoteController, MotionSensor, Direction, BatteryState
 from NooLite_F.Sensors import BinarySensor, GenericListener
-from homeassistant.components.binary_sensor import BinarySensorEntity
+from homeassistant.components.binary_sensor import BinarySensorEntity, PLATFORM_SCHEMA
 from homeassistant.const import CONF_NAME
 from homeassistant.const import CONF_TYPE
 from homeassistant.helpers import config_validation as cv
 
-from . import (PLATFORM_SCHEMA)
 from .base import (NooLiteGenericSensor)
 from .const import (CONF_CHANNEL, BATTERY_LEVEL_DISCHARGED, BATTERY_LEVEL_NORMAL, DOMAIN,
                     TYPE_MOTION, TYPE_BATTERY, TYPE_DOOR, TYPE_GARAGE_DOOR, TYPE_MOISTURE, TYPE_OPENING, TYPE_WINDOW,
@@ -29,7 +28,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 
-def setup_platform(hass, config, add_devices, discovery_info=None):
+async def async_setup_platform(hass, config, add_devices, discovery_info=None):
     """Setup the NooLite platform."""
     _LOGGER.info(config)
 

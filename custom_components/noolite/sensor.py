@@ -2,13 +2,10 @@ import logging
 
 import voluptuous as vol
 from NooLite_F import BatteryState, RemoteController, TempHumiSensor, RGBRemoteController
-from homeassistant.const import CONF_NAME, PERCENTAGE, STATE_ON, \
-    STATE_OFF
-from homeassistant.const import CONF_TYPE, TEMP_CELSIUS
+from homeassistant.const import (CONF_NAME, PERCENTAGE, STATE_ON, STATE_OFF, CONF_TYPE, TEMP_CELSIUS)
 from homeassistant.helpers import config_validation as cv
-from homeassistant.components.sensor import SensorEntity, SensorStateClass, SensorDeviceClass
+from homeassistant.components.sensor import (SensorEntity, SensorStateClass, SensorDeviceClass, PLATFORM_SCHEMA)
 
-from . import (PLATFORM_SCHEMA)
 from .base import (NooLiteGenericSensor, NooLiteGenericRemoteController)
 from .const import (CONF_CHANNEL, DOMAIN,
                     TYPE_HUMI, TYPE_TEMP, TYPE_ANALOG, TYPE_REMOTE, DATA_INTERVAL, BATTERY_DATA_INTERVAL, STATE_TUNE_UP,
@@ -28,7 +25,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 
-def setup_platform(hass, config, add_devices, discovery_info=None):
+async def async_setup_platform(hass, config, add_devices, discovery_info=None):
     """Setup the NooLite platform."""
     _LOGGER.info(config)
 

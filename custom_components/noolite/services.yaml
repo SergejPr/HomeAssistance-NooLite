@@ -1,0 +1,398 @@
+# Light services
+light_start_brightness_tune:
+  name: Start light brightness tune
+  description: Start brightness changing in the selected direction
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: light
+#      device_class: noolite_dimmer
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "light.living_room_lights"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: light
+          device_class: noolite_dimmer
+    direction:
+      description: Direction of the brightness tune
+      name: Direction
+      required: true
+      selector:
+        select:
+          options:
+            - Up
+            - Down
+            - Reverse
+
+
+light_stop_brightness_tune:
+  name: Stop light brightness
+  description: Stop any brightness changing
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: light
+#      device_class: noolite_dimmer
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "light.living_room_lights"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: light
+          device_class: noolite_dimmer
+
+light_load_preset:
+  name: Load light state
+  description: Load the saved state
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: light
+#      device_class: noolite_dimmer
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "light.living_room_lights"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: light
+          device_class: noolite_dimmer
+
+light_save_preset:
+  name: Save light state
+  description: Save the current state
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: light
+#      device_class: noolite_dimmer
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "light.living_room_lights"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: light
+          device_class: noolite_dimmer
+
+
+# RGB services
+rgb_start_brightness_tune:
+  name: Start RGB brightness tune
+  description: Start brightness changing in the selected direction
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: light
+#      device_class: noolite_rgb
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "light.living_room_rgb_led"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: light
+          device_class: noolite_rgb
+    direction:
+      description: Direction of the brightness tune
+      name: Direction
+      required: true
+      selector:
+        select:
+          options:
+            - Up
+            - Down
+            - Reverse
+
+rgb_stop_tune:
+  name: Stop RGB tune
+  description: Stop any color, speed or brightness changing
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: light
+#      device_class: noolite_rgb
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "light.living_room_rgb_led"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: light
+          device_class: noolite_rgb
+
+rgb_start_roll_color:
+  name: Start RGB color
+  description: Start color changing
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: light
+#      device_class: noolite_rgb
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "light.living_room_rgb_led"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: light
+          device_class: noolite_rgb
+
+rgb_switch_color:
+  name: RGB switch color
+  description: Switch color to next
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: light
+#      device_class: noolite_rgb
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "light.living_room_rgb_led"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: light
+          device_class: noolite_rgb
+
+rgb_switch_mode:
+  name: RGB switch mode
+  description: Switch RGB controller mode to the next
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: light
+#      device_class: noolite_rgb
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "light.living_room_rgb_led"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: light
+          device_class: noolite_rgb
+
+rgb_start_switch_speed:
+  name: Start RGB speed
+  description: Start color speed changing in the reverse direction
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: light
+#      device_class: noolite_rgb
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "light.living_room_rgb_led"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: light
+          device_class: noolite_rgb
+
+rgb_load_preset:
+  name: Load rgb led state
+  description: Load the preset state
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: light
+#      device_class: noolite_rgb
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "light.living_room_rgb_led"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: light
+          device_class: noolite_rgb
+
+rgb_save_preset:
+  name: Save rgb led state
+  description: Save the current state as preset
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: light
+#      device_class: noolite_rgb
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "light.living_room_rgb_led"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: light
+          device_class: noolite_rgb
+
+
+# Fan services
+fan_start_speed_tune:
+  name: Start fan speed tune
+  description: Start speed changing in the selected direction
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: fan
+#      device_class: noolite_fan
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "fan.living_room_fan"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: fan
+          device_class: noolite_fan
+    direction:
+      description: Direction of the brightness tune
+      name: Direction
+      required: true
+      selector:
+        select:
+          options:
+            - Up
+            - Down
+            - Reverse
+
+
+fan_stop_speed_tune:
+  name: Stop fan speed tune
+  description: Stop speed changing
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: fan
+#      device_class: noolite_fan
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "fan.living_room_fan"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: fan
+          device_class: noolite_fan
+
+fan_load_preset:
+  name: Load fan state
+  description: Load the saved state
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: fan
+#      device_class: noolite_fan
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "fan.living_room_fan"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: fan
+          device_class: noolite_fan
+
+fan_save_preset:
+  name: Save fan state
+  description: Save the current switch state
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: fan
+#      device_class: noolite_fan
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "fan.living_room_fan"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: fan
+          device_class: noolite_fan
+
+
+# Switch services
+switch_load_preset:
+  name: Load switch state
+  description: Load the saved state
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: switch
+#      device_class: noolite_switch
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "switch.living_room_switch"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: switch
+          device_class: noolite_switch
+
+switch_save_preset:
+  name: Save switch state
+  description: Save the current switch state
+#  target:
+#    entity:
+#      integration: noolite
+#      domain: switch
+#      device_class: noolite_switch
+  fields:
+    entity_id:
+      description: Name of entity to send command.
+      example: "switch.living_room_switch"
+      name: Entity
+      required: true
+      selector:
+        entity:
+#          integration: noolite
+          domain: switch
+          device_class: noolite_switch

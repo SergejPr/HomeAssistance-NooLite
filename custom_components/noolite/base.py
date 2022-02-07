@@ -1,6 +1,7 @@
 import logging
 from threading import Timer
 
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import CONF_NAME, CONF_MODE, ATTR_BATTERY_LEVEL, STATE_UNKNOWN
 from homeassistant.helpers.entity import ToggleEntity, Entity
 
@@ -99,6 +100,12 @@ class NooLiteGenericModule(ToggleEntity):
         # to give one more chance to receive data
         self._ignore_next_update = state is not None and ignore_next
 
+    def load_preset(self):
+        self._device.load_preset(None, self._channel, self._broadcast, self._mode)
+
+    def save_preset(self):
+        self._device.save_preset(None, self._channel, self._broadcast, self._mode)
+
 
 class NooLiteGenericSensor(Entity):
     def __init__(self, config, device, battery_timeout):
@@ -156,7 +163,7 @@ class NooLiteGenericSensor(Entity):
         pass
 
 
-class NooLiteGenericRemoteController(NooLiteGenericSensor):
+class NooLiteGenericRemoteController(NooLiteGenericSensor, SensorEntity):
     def __init__(self, config, device, battery_timeout):
         super().__init__(config, device, battery_timeout)
         self._timer = None
@@ -165,13 +172,13 @@ class NooLiteGenericRemoteController(NooLiteGenericSensor):
     def set_state(self, state: str):
         _LOGGER.debug('{0} state received: {1}'.format(self.name, state))
         self.action_detected()
-        self._attr_state = state
+        self._attr_native_value = state
         self.schedule_update_ha_state()
         self._start_timer()
 
     def reset_state(self):
         self._cancel_timer()
-        self._attr_state = STATE_UNKNOWN
+        self._attr_native_value = STATE_UNKNOWN
         self.schedule_update_ha_state()
 
     def _start_timer(self):
@@ -183,3 +190,7 @@ class NooLiteGenericRemoteController(NooLiteGenericSensor):
         if self._timer is not None:
             self._timer.cancel()
         self.timer = None
+
+    def on_battery_timeout(self):
+        self._attr_native_value = None
+        super(NooLiteGenericRemoteController, self).on_battery_timeout()
