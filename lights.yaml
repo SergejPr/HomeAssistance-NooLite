@@ -1,20 +1,47 @@
 - platform: noolite
   channel: 0
-  name: "living_room_light"
-  scan_interval: 60
-  type: dimmer
-  mode: noolite-f
+  name: "SD-1-180"
+  type: rgb_led
+  mode: noolite
 
 - platform: noolite
   channel: 1
-  name: "living_room_work_lights"
+  name: "SUF-1-300-v2 (F)"
   type: dimmer
   mode: noolite-f
-  scan_interval: 60
-  broadcast: true
+
+- platform: noolite
+  channel: 6
+  name: "SUF-1-300-v2"
+  type: dimmer
+  mode: noolite
 
 - platform: noolite
   channel: 2
-  name: "bathroom_light"
-  scan_interval: 60
+  name: "SU-1-500"
+  mode: noolite
+
+- platform: noolite
+  channel: 3
+  name: "SRF-1-3000 (F)"
   mode: noolite-f
+
+- platform: noolite
+  channel: 4
+  name: "SLF-1-300-v3"
+  mode: noolite
+
+- platform: noolite
+  channel: 5
+  name: "SLF-1-300-v3 (F)"
+  mode: noolite-f
+
+- platform: noolite
+  channel: 11
+  name: "SUF-1-300-v0 (F)"
+  mode: noolite-f
+
+- platform: noolite
+  channel: 12
+  name: "SUF-1-300-v0"
+  mode: noolite

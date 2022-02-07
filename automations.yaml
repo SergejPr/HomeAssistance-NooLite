@@ -1,0 +1,121 @@
+- id: '1644067644426'
+  alias: Light switch
+  trigger:
+  - platform: state
+    entity_id: sensor.pb211
+    to: switch
+  action:
+  - service: light.toggle
+    data: {}
+    target:
+      entity_id: light.suf_1_300_v2_f
+  mode: single
+- id: '1644157777873'
+  alias: 'Light tune back '
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.pb211
+    to: tune_back
+  condition: []
+  action:
+  - service: noolite.light_start_brightness_tune
+    data:
+      entity_id: light.suf_1_300_v2_f
+      direction: Reverse
+  mode: single
+- id: '1644171302790'
+  alias: Light tune stop
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.pb211
+    to: tune_stop
+  condition: []
+  action:
+  - service: noolite.light_stop_brightness_tune
+    data:
+      entity_id: light.suf_1_300_v2_f
+  mode: single
+- id: '1644188364095'
+  alias: Light tune up
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.pb211
+    to: tune_up
+  condition: []
+  action:
+  - service: noolite.light_start_brightness_tune
+    data:
+      entity_id: light.suf_1_300_v2_f
+      direction: Up
+  mode: single
+- id: '1644188463890'
+  alias: Light tune down
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.pb211
+    to: tune_down
+  condition: []
+  action:
+  - service: noolite.light_start_brightness_tune
+    data:
+      entity_id: light.suf_1_300_v2_f
+      direction: Down
+  mode: single
+- id: '1644188528359'
+  alias: Light on
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.pb211
+    to: 'on'
+  condition: []
+  action:
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id: light.suf_1_300_v2_f
+  mode: single
+- id: '1644188592247'
+  alias: Light off
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.pb211
+    to: 'off'
+  condition: []
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.suf_1_300_v2_f
+  mode: single
+- id: '1644188777364'
+  alias: Light load preset
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.pb211
+    to: load_preset
+  condition: []
+  action:
+  - service: noolite.light_load_preset
+    data:
+      entity_id: light.suf_1_300_v2_f
+  mode: single
+- id: '1644190104867'
+  alias: Light save preset
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.pb211
+    to: save_preset
+  condition: []
+  action:
+  - service: noolite.light_save_preset
+    data:
+      entity_id: light.suf_1_300_v2_f
+  mode: single

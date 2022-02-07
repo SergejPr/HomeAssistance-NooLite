@@ -1,6 +1,21 @@
 - platform: noolite
-  channel: 7
-  name: "sofa_fan"
+  channel: 1
+  name: "SUF-1-300-v2 (F)"
   speed_enabled: true
-  scan_interval: 60
+  mode: noolite-f
+
+- platform: noolite
+  channel: 6
+  name: "SUF-1-300-v2"
+  speed_enabled: true
+  mode: noolite
+
+- platform: noolite
+  channel: 4
+  name: "SLF-1-300-v3"
+  mode: noolite
+
+- platform: noolite
+  channel: 5
+  name: "SLF-1-300-v3 (F)"
   mode: noolite-f

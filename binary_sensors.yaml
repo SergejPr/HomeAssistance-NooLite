@@ -1,9 +1,25 @@
 - platform: noolite
-  channel: 10
-  name: "hall_motion"
-  type: motion
+  channel: 1
+  name: "PU112-2"
+  type: remote
 
 - platform: noolite
-  channel: 11
-  name: "kitchen_moisture"
-  type: moisture
+  channel: 7
+  name: "PB211"
+  type: remote
+
+- platform: noolite
+  channel: 8
+  name: "PK315"
+  type: remote
+
+- platform: noolite
+  channel: 60
+  name: "PK315"
+  type: remote
+
+- platform: noolite
+  channel: 10
+  name: "PM112 (Motion)"
+  type: motion
+
