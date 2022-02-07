@@ -6,7 +6,7 @@ NooLite platform for Home Assistance
 **Note:** Currently supported only MTRF adapters.
 
 **Note:** version 0.1.+ supported only in HA 8.16.0 and above. It is related to changing of the custom component architecture.
-
+**Note:** version 0.2.+ supported only in HA 2022.2.2 and above.
 
 Installation
 ============
@@ -64,7 +64,7 @@ where
   + light
   + motion
   + battery (in noolite remotes)
-  + remote (for noolite remotes, support on, off, switch and load_preset events)
+  + remote (for noolite remotes, support on, off events)
 
 You can see example in file `binary_sensors.yaml`
 
@@ -95,10 +95,36 @@ where
   + temp - temperature sensor
   + humi - humidity sensor
   + analog - analog input value (for more details see https://noo.by/images/downloads/noolite-api_v1-0.pdf)
-  + remote - noolite remotes, support on, off, tune start and tune stop events)
+  + remote - noolite remotes
+  + rgb_remote - noolite rgb remotes
 
 You can see example in file `sensors.yaml`
 
+Possible states for `remote` sensor type:
+
++ on
++ off
++ switch
++ tune_up
++ tune_down
++ tune_back
++ tune_stop
++ load_preset
++ save_preset
+
+Possible states for `rgb_remote` sensor type:
+
++ switch
++ tune_back
++ tune_stop
++ roll_color
++ switch_mode
++ switch_color
++ switch_speed
+
+Each of these states match to appropriate command received from remote. For more details see manual for remotes.
+
+**Note:** Each state stay active around 200ms, after this it reset to `unknown` value. It is related to that noolite remotes send commands not states.
 
 Light
 -----
@@ -182,8 +208,6 @@ You can see example in `switches.yaml`
 Fan
 ----
 
-**IMPORTANT!!!** This entity type is experimental.
-
 Create file `fans.yaml`.
 
 Add next line to `Configuration.yaml`::
@@ -223,8 +247,80 @@ where
 You can see example in `fans.yaml`
 
 
+Services
+========
+
+Noolite integration extends default services for lights, fans and switch.
+
+**IMPORTANT** using some services with modules in `noolite` mode, can cause incorrect states.
+It is related that we don known finish state after service call. For example, service noolite.light_load_preset
+restores saved state, but we don't know which this state is: on or off, which brightness was saved.
+
+Lights
+------
+
+Allowing following services:
+
+* noolite.light_start_brightness_tune - start brightness changing in specific direction (only for dimmer type)
+* noolite.light_stop_brightness_tune - stop brightness changing (only for dimmer type)
+* noolite.light_load_preset - load and apply saved module tate (temporary only for dimmer type)
+* noolite.light_save_preset - save current module state (temporary available only for dimmer type)
+* noolite.rgb_start_brightness_tune - start brightness changing in specific direction (only available for rgb_led type)
+* noolite.rgb_stop_tune - stop brightness changing (only for rgb_led type)
+* noolite.rgb_start_roll_color - start color changing (only for rgb_led type)
+* noolite.rgb_switch_color - switch color to next (only for rgb_led type)
+* noolite.rgb_switch_mode - switch controller work mode: fixed color or change colors (only for rgb_led type)
+* noolite.rgb_start_switch_speed - start speed changing of color switching (only for rgb_led type)
+* noolite.rgb_load_preset - load and apply saved module tate (temporary available only for rgb_led type)
+* noolite.rgb_save_preset - save current module state (temporary available only for rgb_led type)
+
+
+Switches
+--------
+
+Allowing following services:
+
+* noolite.switch_load_preset - load and apply saved module tate
+* noolite.switch_save_preset - save current module state
+
+Fans
+----
+
+Allowing following services:
+
+* noolite.fan_start_speed_tune - start speed changing in specific direction (only if fan uses noolite-f module and speed_enabled is set to true)
+* noolite.fan_stop_speed_tune - stop speed changing (only if fan uses noolite-f module and speed_enabled is set to true)
+* noolite.fan_load_preset - load and apply saved module tate (temporary available only if fan uses noolite-f module and speed_enabled is set to true)
+* noolite.fan_save_preset - save current module state (temporary available only if fan uses noolite-f module and speed_enabled is set to true)
+
+Bind noolite remotes with services
+----------------------------------
+
+Create file `automations.yaml`.
+
+Add next line to `Configuration.yaml`::
+
+    automation: !include automations.yaml
+
+After this you can create automations using HA interface. Open HA in browser, go to Configurations -> Automations and scenes.
+Also you can create automations manually. Please see parameters required for services in examples in automations.yaml.
+
+
 Change log:
 ==========
+
+v0.2.0
+------
+* reworking binary_sensors and sensors for noolite remotes
+* add rgb remote support
+* update sensors to subclass of SensorEntity
+* use attributes instead of override methods
+* add noolite service that allows use native module command
+
+**Breaking changes:**
+
+* can be don't working with version oldest then 2022.2.2
+* rename remote sensor states, so old sensor config can be broken
 
 v0.1.3
 ------
