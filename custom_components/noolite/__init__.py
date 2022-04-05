@@ -17,7 +17,7 @@ _LOGGER = logging.getLogger(__name__)
 CONFIG_SCHEMA = vol.Schema({
     DOMAIN: vol.Schema({
         vol.Optional(CONF_PORT, default=DEFAULT_PORT): cv.string,
-        vol.Optional(CONF_BAUDRATE, default=DEFAULT_BAUDRATE): cv.string,
+        vol.Optional(CONF_BAUDRATE, default=DEFAULT_BAUDRATE): cv.positive_int,
     }),
 }, extra=vol.ALLOW_EXTRA)
 

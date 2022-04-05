@@ -8,6 +8,7 @@ logbook:
 
 noolite:
   port: "/dev/ttyUSB0"
+  baudrate: 9600
 
 automation: !include automations.yaml
 

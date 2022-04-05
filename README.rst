@@ -21,14 +21,14 @@ Add next rows to `Configuration.yaml`::
 
     noolite:
       port: "port_name"
-      baudrate: "baudrate"
+      baudrate: baudrate_value
 
 where `port_name` is your NooLite adapter port:
 
 * for Windows it is `COM0`, `COM1`, etc.
 * fot Linux it is `/dev/ttyUSB0`, `/dev/ttyUSB1`, etc.
 
-and `baudrate` is port baudrate:
+and `baudrate_value` is port baudrate:
 
 * 9600 (default value)
 * 115200 (requires upgrade MTRF adapter firmware)
