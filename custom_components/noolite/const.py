@@ -24,6 +24,7 @@ DEVICE_CLASS_RGB = 'noolite_rgb'
 DEVICE_CLASS_FAN = 'noolite_fan'
 DEVICE_CLASS_SWITCH = 'noolite_switch'
 
+CONF_BAUDRATE = 'baudrate'
 CONF_CHANNEL = 'channel'
 CONF_BROADCAST = 'broadcast'
 CONF_SPEED_ENABLED = 'speed_enabled'

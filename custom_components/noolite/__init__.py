@@ -9,13 +9,15 @@ from homeassistant.const import CONF_PORT
 from homeassistant.const import EVENT_HOMEASSISTANT_STOP
 from homeassistant.helpers import config_validation as cv
 
-from .const import DOMAIN, DEFAULT_PORT
+from .const import DOMAIN, CONF_BAUDRATE, DEFAULT_PORT
+from NooLite_F.MTRF64.MTRF64Adapter import DEFAULT_BAUDRATE
 
 _LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = vol.Schema({
     DOMAIN: vol.Schema({
         vol.Optional(CONF_PORT, default=DEFAULT_PORT): cv.string,
+        vol.Optional(CONF_BAUDRATE, default=DEFAULT_BAUDRATE): cv.string,
     }),
 }, extra=vol.ALLOW_EXTRA)
 
@@ -27,7 +29,7 @@ def setup(hass, config):
     from serial import SerialException
 
     try:
-        hass.data[DOMAIN] = MTRF64Controller(config[DOMAIN][CONF_PORT])
+        hass.data[DOMAIN] = MTRF64Controller(config[DOMAIN][CONF_PORT], config[DOMAIN][CONF_BAUDRATE])
     except SerialException as exc:
         _LOGGER.error("Unable to open serial port for NooLite: %s", exc)
         return False
