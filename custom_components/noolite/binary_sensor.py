@@ -212,7 +212,7 @@ class NooLiteRemoteSensor(NooLiteGenericSensor, BinarySensorEntity):
                                         channel=self._channel,
                                         on_on=self._on_on,
                                         on_off=self._on_off,
-                                        on_switch=None,
+                                        on_switch=self._on_switch,
                                         on_tune_start=None,
                                         on_tune_back=None,
                                         on_tune_stop=None,
@@ -227,6 +227,11 @@ class NooLiteRemoteSensor(NooLiteGenericSensor, BinarySensorEntity):
 
     def _on_off(self):
         self._attr_is_on = False
+        self.schedule_update_ha_state()
+        self.action_detected()
+
+    def _on_switch(self):
+        self._attr_is_on = not self._attr_is_on
         self.schedule_update_ha_state()
         self.action_detected()
 
