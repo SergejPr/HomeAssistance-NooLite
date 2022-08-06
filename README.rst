@@ -70,7 +70,7 @@ where
   + light
   + motion
   + battery (in noolite remotes)
-  + remote (for noolite remotes, support on, off events)
+  + remote (for noolite remotes, support on, off and switch events)
 
 You can see example in file `binary_sensors.yaml`
 
@@ -314,6 +314,9 @@ Also you can create automations manually. Please see parameters required for ser
 
 Change log:
 ==========
+v0.2.2
+------
+* return switch event handling for binary sensors
 
 v0.2.1
 ------
