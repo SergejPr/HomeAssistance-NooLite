@@ -2,7 +2,7 @@ import logging
 
 import voluptuous as vol
 from NooLite_F import Direction
-from homeassistant.components.fan import (FanEntity, SUPPORT_SET_SPEED, PLATFORM_SCHEMA)
+from homeassistant.components.fan import (FanEntity, FanEntityFeature, PLATFORM_SCHEMA)
 from homeassistant.const import CONF_NAME, CONF_MODE, CONF_SCAN_INTERVAL
 from homeassistant.helpers import config_validation as cv, entity_platform
 
@@ -77,7 +77,7 @@ class NooLiteFan(NooLiteGenericModule, FanEntity):
         self._last_turn_on_percentage = 100
         if config[CONF_SPEED_ENABLED] is True:
             self._attr_speed_count = config[CONF_SPEED_COUNT]
-            self._attr_supported_features = SUPPORT_SET_SPEED
+            self._attr_supported_features = FanEntityFeature(FanEntityFeature.SET_SPEED | FanEntityFeature.TURN_ON | FanEntityFeature.TURN_OFF)
             self._attr_device_class = DEVICE_CLASS_FAN
 
     def turn_on(self, percentage: int = None, preset_mode: str = None, **kwargs) -> None:
@@ -108,9 +108,6 @@ class NooLiteFan(NooLiteGenericModule, FanEntity):
         self._attr_percentage = self._level * 100
 
     def set_direction(self, direction: str) -> None:
-        pass
-
-    def set_speed(self, speed: str) -> None:
         pass
 
     def set_preset_mode(self, preset_mode: str) -> None:

@@ -6,7 +6,10 @@ NooLite platform for Home Assistance
 **Note:** Currently supported only MTRF adapters.
 
 **Note:** version 0.1.+ supported only in HA 8.16.0 and above. It is related to changing of the custom component architecture.
+
 **Note:** version 0.2.+ supported only in HA 2022.2.2 and above.
+
+**Note:** version 0.3.+ supported only in HA 2025.2.4 and above.
 
 Installation
 ============
@@ -314,6 +317,16 @@ Also you can create automations manually. Please see parameters required for ser
 
 Change log:
 ==========
+
+v0.2.2
+------
+* added support of 2025.3
+
+**Breaking changes:**
+
+* can be don't working with version oldest then 2025.2.4
+
+
 v0.2.2
 ------
 * return switch event handling for binary sensors

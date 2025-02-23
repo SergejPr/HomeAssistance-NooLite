@@ -2,7 +2,7 @@ import logging
 
 import voluptuous as vol
 from NooLite_F import BatteryState, RemoteController, TempHumiSensor, RGBRemoteController
-from homeassistant.const import (CONF_NAME, PERCENTAGE, STATE_ON, STATE_OFF, CONF_TYPE, TEMP_CELSIUS)
+from homeassistant.const import (CONF_NAME, PERCENTAGE, STATE_ON, STATE_OFF, CONF_TYPE, UnitOfTemperature)
 from homeassistant.helpers import config_validation as cv
 from homeassistant.components.sensor import (SensorEntity, SensorStateClass, SensorDeviceClass, PLATFORM_SCHEMA)
 
@@ -50,7 +50,7 @@ class NooLiteTemperatureSensor(NooLiteGenericSensor, SensorEntity):
     def __init__(self, config, device):
         super().__init__(config, device, DATA_INTERVAL)
         self._sensor = TempHumiSensor(device, self._channel, self._on_data)
-        self._attr_native_unit_of_measurement = TEMP_CELSIUS
+        self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
         self._attr_device_class = SensorDeviceClass.TEMPERATURE
         self._attr_state_class = SensorStateClass.MEASUREMENT
 

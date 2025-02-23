@@ -1,6 +1,6 @@
 {
   "domain": "noolite",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "name": "HomeAssistance-NooLite",
   "documentation": "https://github.com/SergejPr/HomeAssistance-NooLite",
   "codeowners": ["@SergejPr"],

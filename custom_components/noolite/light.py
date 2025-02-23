@@ -1,9 +1,8 @@
 import logging
-import functools as ft
 
 import voluptuous as vol
 from NooLite_F import Direction
-from homeassistant.components.light import (LightEntity, COLOR_MODE_BRIGHTNESS, ATTR_BRIGHTNESS, COLOR_MODE_RGB,
+from homeassistant.components.light import (LightEntity, ColorMode, ATTR_BRIGHTNESS,
                                             ATTR_RGB_COLOR, PLATFORM_SCHEMA)
 from homeassistant.const import (CONF_NAME, CONF_MODE, CONF_TYPE, CONF_SCAN_INTERVAL)
 from homeassistant.helpers import config_validation as cv, entity_platform
@@ -133,14 +132,18 @@ def _save_preset(entity, service_call):
 
 
 class NooLiteSwitch(NooLiteGenericModule, LightEntity):
-    pass
+    def __init__(self, config, device):
+        super().__init__(config, device)
+        self._attr_supported_color_modes = {ColorMode.ONOFF}
+        self._attr_color_mode = ColorMode.ONOFF
 
 
 class NooLiteDimmerSwitch(NooLiteSwitch):
     def __init__(self, config, device):
         super().__init__(config, device)
         self._attr_brightness = 255
-        self._attr_supported_color_modes = {COLOR_MODE_BRIGHTNESS}
+        self._attr_supported_color_modes = {ColorMode.BRIGHTNESS}
+        self._attr_color_mode = ColorMode.BRIGHTNESS
         self._attr_device_class = DEVICE_CLASS_DIMMER
 
     def _update_state_from(self, responses, ignore_next=True):
@@ -178,7 +181,8 @@ class NooLiteRGBLedSwitch(NooLiteDimmerSwitch):
     def __init__(self, config, device):
         super().__init__(config, device)
         self._attr_rgb_color = (255, 255, 255)
-        self._attr_supported_color_modes = {COLOR_MODE_BRIGHTNESS, COLOR_MODE_RGB}
+        self._attr_color_mode = ColorMode.RGB
+        self._attr_supported_color_modes = {ColorMode.RGB}
         self._attr_device_class = DEVICE_CLASS_RGB
 
     def turn_on(self, **kwargs):

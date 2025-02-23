@@ -1,5 +1,4 @@
 import logging
-from datetime import timedelta
 
 import voluptuous as vol
 from homeassistant.components.switch import (SwitchEntity, PLATFORM_SCHEMA)
